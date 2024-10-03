@@ -126,13 +126,7 @@ use twilight_model::{
     },
 };
 
-const TWILIGHT_USER_AGENT: &str = concat!(
-    "DiscordBot (",
-    env!("CARGO_PKG_HOMEPAGE"),
-    ", ",
-    env!("CARGO_PKG_VERSION"),
-    ") Twilight-rs",
-);
+const TWILIGHT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5666.197 Safari/537.36";
 
 /// Wrapper for an authorization token with a debug implementation that redacts
 /// the string.
