@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::template::Template,
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
 
 /// Get a list of templates in a guild, by ID.
@@ -24,6 +25,7 @@ impl<'a> GetTemplates<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetTemplates<'_> {
     type Output = Result<Response<ListBody<Template>>, Error>;
 

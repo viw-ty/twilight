@@ -1,14 +1,18 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
-    request::{attachment::AttachmentManager, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
+    request::{
+        Request, TryIntoRequest, application::interaction::CreateResponseWithResponse,
+        attachment::AttachmentManager,
+    },
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     http::interaction::InteractionResponse,
-    id::{marker::InteractionMarker, Id},
+    id::{Id, marker::InteractionMarker},
 };
 
 /// Respond to an interaction, by its ID and token.
@@ -36,8 +40,18 @@ impl<'a> CreateResponse<'a> {
             http,
         }
     }
+
+    pub const fn with_response(self) -> CreateResponseWithResponse<'a> {
+        CreateResponseWithResponse::new(
+            self.http,
+            self.interaction_id,
+            self.interaction_token,
+            self.response,
+        )
+    }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateResponse<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 
@@ -58,6 +72,7 @@ impl TryIntoRequest for CreateResponse<'_> {
         let mut request = Request::builder(&Route::InteractionCallback {
             interaction_id: self.interaction_id.get(),
             interaction_token: self.interaction_token,
+            with_response: false,
         });
 
         // Interaction executions don't need the authorization token, only the
@@ -91,7 +106,6 @@ impl TryIntoRequest for CreateResponse<'_> {
 mod tests {
     use crate::{client::Client, request::TryIntoRequest};
     use std::error::Error;
-    use twilight_http_ratelimiting::Path;
     use twilight_model::{
         http::interaction::{InteractionResponse, InteractionResponseType},
         id::Id,
@@ -116,10 +130,6 @@ mod tests {
             .try_into_request()?;
 
         assert!(!req.use_authorization_token());
-        assert_eq!(
-            &Path::InteractionCallback(interaction_id.get()),
-            req.ratelimit_path()
-        );
 
         Ok(())
     }

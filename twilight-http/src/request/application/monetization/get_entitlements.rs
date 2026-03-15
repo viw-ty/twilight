@@ -3,20 +3,24 @@ use std::future::IntoFuture;
 use twilight_model::{
     application::monetization::Entitlement,
     id::{
-        marker::{ApplicationMarker, EntitlementMarker, GuildMarker, SkuMarker, UserMarker},
         Id,
+        marker::{ApplicationMarker, EntitlementMarker, GuildMarker, SkuMarker, UserMarker},
     },
 };
 
 use crate::{
+    Client, Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, ResponseFuture},
     routing::Route,
-    Client, Error, Response,
+};
+#[cfg(not(target_os = "wasi"))]
+use crate::{
+    Response,
+    response::{ResponseFuture, marker::ListBody},
 };
 
 use twilight_validate::request::{
-    get_entitlements_limit as validate_get_entitlements_limit, ValidationError,
+    ValidationError, get_entitlements_limit as validate_get_entitlements_limit,
 };
 
 struct GetEntitlementsFields<'a> {
@@ -115,6 +119,7 @@ impl<'a> GetEntitlements<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetEntitlements<'_> {
     type Output = Result<Response<ListBody<Entitlement>>, Error>;
 

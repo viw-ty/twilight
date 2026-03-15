@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{GuildMarker, IntegrationMarker},
     Id,
+    marker::{GuildMarker, IntegrationMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Delete an integration for a guild, by the integration's id.
 #[must_use = "requests must be configured and executed"]
@@ -44,6 +45,7 @@ impl<'a> AuditLogReason<'a> for DeleteGuildIntegration<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteGuildIntegration<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{ChannelMarker, MessageMarker},
     Id,
+    marker::{ChannelMarker, MessageMarker},
 };
 
 /// Delete all reactions by all users on a message.
@@ -33,6 +34,7 @@ impl<'a> DeleteAllReactions<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteAllReactions<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

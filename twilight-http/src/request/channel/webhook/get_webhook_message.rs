@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::Message,
     id::{
-        marker::{ChannelMarker, MessageMarker, WebhookMarker},
         Id,
+        marker::{ChannelMarker, MessageMarker, WebhookMarker},
     },
 };
 
@@ -42,13 +43,14 @@ impl<'a> GetWebhookMessage<'a> {
 
     /// Get a message in a thread belonging to the channel instead of the
     /// channel itself.
-    pub fn thread_id(mut self, thread_id: Id<ChannelMarker>) -> Self {
+    pub const fn thread_id(mut self, thread_id: Id<ChannelMarker>) -> Self {
         self.thread_id.replace(thread_id);
 
         self
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetWebhookMessage<'_> {
     type Output = Result<Response<Message>, Error>;
 

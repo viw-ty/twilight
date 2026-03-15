@@ -1,15 +1,16 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::{
     channel::FollowedChannel,
-    id::{marker::ChannelMarker, Id},
+    id::{Id, marker::ChannelMarker},
 };
 
 #[derive(Serialize)]
@@ -39,6 +40,7 @@ impl<'a> FollowNewsChannel<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for FollowNewsChannel<'_> {
     type Output = Result<Response<FollowedChannel>, Error>;
 

@@ -1,4 +1,4 @@
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 #![warn(
     clippy::missing_const_for_fn,
@@ -9,7 +9,8 @@
 #![allow(
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
-    clippy::unnecessary_wraps
+    clippy::unnecessary_wraps,
+    clippy::used_underscore_items
 )]
 
 #[cfg(feature = "builder")]

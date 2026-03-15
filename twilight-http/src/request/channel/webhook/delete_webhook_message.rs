@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{ChannelMarker, MessageMarker, WebhookMarker},
     Id,
+    marker::{ChannelMarker, MessageMarker, WebhookMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Delete a message created by a webhook.
 ///
@@ -59,7 +60,7 @@ impl<'a> DeleteWebhookMessage<'a> {
 
     /// Delete in a thread belonging to the channel instead of the channel
     /// itself.
-    pub fn thread_id(mut self, thread_id: Id<ChannelMarker>) -> Self {
+    pub const fn thread_id(mut self, thread_id: Id<ChannelMarker>) -> Self {
         self.thread_id.replace(thread_id);
 
         self
@@ -74,6 +75,7 @@ impl<'a> AuditLogReason<'a> for DeleteWebhookMessage<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteWebhookMessage<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

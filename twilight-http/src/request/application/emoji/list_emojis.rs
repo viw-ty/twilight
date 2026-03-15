@@ -1,14 +1,16 @@
 use std::future::IntoFuture;
 
+#[cfg(not(target_os = "wasi"))]
+use crate::{Response, response::ResponseFuture};
+
 use crate::{
+    Client, Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, ResponseFuture},
     routing::Route,
-    Client, Error, Response,
 };
 use twilight_model::{
-    guild::Emoji,
-    id::{marker::ApplicationMarker, Id},
+    application::EmojiList,
+    id::{Id, marker::ApplicationMarker},
 };
 
 #[must_use = "requests must be configured and executed"]
@@ -26,10 +28,11 @@ impl<'a> ListApplicationEmojis<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for ListApplicationEmojis<'_> {
-    type Output = Result<Response<ListBody<Emoji>>, Error>;
+    type Output = Result<Response<EmojiList>, Error>;
 
-    type IntoFuture = ResponseFuture<ListBody<Emoji>>;
+    type IntoFuture = ResponseFuture<EmojiList>;
 
     fn into_future(self) -> Self::IntoFuture {
         let http = self.http;

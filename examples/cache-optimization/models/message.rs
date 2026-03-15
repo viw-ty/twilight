@@ -1,8 +1,7 @@
 use twilight_cache_inmemory::CacheableMessage;
 use twilight_model::{
-    channel::{message::Reaction, Message},
-    gateway::payload::incoming::MessageUpdate,
-    id::{marker::MessageMarker, Id},
+    channel::{Message, message::Reaction},
+    id::{Id, marker::MessageMarker},
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -49,11 +48,5 @@ impl CacheableMessage for MinimalCachedMessage {
 
     fn retain_reactions(&mut self, _f: impl FnMut(&Reaction) -> bool) {
         // No-op
-    }
-
-    fn update_with_message_update(&mut self, message_update: &MessageUpdate) {
-        if let Some(content) = &message_update.content {
-            self.content.clone_from(content);
-        }
     }
 }

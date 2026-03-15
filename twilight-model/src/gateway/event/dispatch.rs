@@ -1,7 +1,7 @@
 use super::{super::payload::incoming::*, Event, EventConversionError, EventType};
 use serde::{
-    de::{Deserialize, DeserializeSeed, Deserializer, Error as DeError, IgnoredAny},
     Serialize,
+    de::{Deserialize, DeserializeSeed, Deserializer, Error as DeError, IgnoredAny},
 };
 
 /// A dispatch event, containing information about a created guild, a member
@@ -57,11 +57,12 @@ pub enum DispatchEvent {
     MessagePollVoteRemove(MessagePollVoteRemove),
     MessageUpdate(Box<MessageUpdate>),
     PresenceUpdate(Box<PresenceUpdate>),
+    RateLimited(RateLimited),
     ReactionAdd(Box<ReactionAdd>),
     ReactionRemove(Box<ReactionRemove>),
     ReactionRemoveAll(ReactionRemoveAll),
     ReactionRemoveEmoji(ReactionRemoveEmoji),
-    Ready(Box<Ready>),
+    Ready(Ready),
     Resumed,
     RoleCreate(RoleCreate),
     RoleDelete(RoleDelete),
@@ -130,6 +131,7 @@ impl DispatchEvent {
             Self::MessagePollVoteRemove(_) => EventType::MessagePollVoteRemove,
             Self::MessageUpdate(_) => EventType::MessageUpdate,
             Self::PresenceUpdate(_) => EventType::PresenceUpdate,
+            Self::RateLimited(_) => EventType::RateLimited,
             Self::ReactionAdd(_) => EventType::ReactionAdd,
             Self::ReactionRemove(_) => EventType::ReactionRemove,
             Self::ReactionRemoveAll(_) => EventType::ReactionRemoveAll,
@@ -245,7 +247,7 @@ impl<'a> DispatchEventWithTypeDeserializer<'a> {
     }
 }
 
-impl<'de, 'a> DeserializeSeed<'de> for DispatchEventWithTypeDeserializer<'a> {
+impl<'de> DeserializeSeed<'de> for DispatchEventWithTypeDeserializer<'_> {
     type Value = DispatchEvent;
 
     #[allow(clippy::too_many_lines)]
@@ -389,7 +391,8 @@ impl<'de, 'a> DeserializeSeed<'de> for DispatchEventWithTypeDeserializer<'a> {
             "PRESENCE_UPDATE" => {
                 DispatchEvent::PresenceUpdate(Box::new(PresenceUpdate::deserialize(deserializer)?))
             }
-            "READY" => DispatchEvent::Ready(Box::new(Ready::deserialize(deserializer)?)),
+            "RATE_LIMITED" => DispatchEvent::RateLimited(RateLimited::deserialize(deserializer)?),
+            "READY" => DispatchEvent::Ready(Ready::deserialize(deserializer)?),
             "RESUMED" => {
                 deserializer.deserialize_ignored_any(IgnoredAny)?;
 

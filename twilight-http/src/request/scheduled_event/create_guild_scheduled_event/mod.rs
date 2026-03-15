@@ -8,25 +8,26 @@ pub use self::{
 };
 
 use super::EntityMetadataFields;
+#[cfg(not(target_os = "wasi"))]
+use crate::response::ResponseFuture;
 use crate::{
     client::Client,
     error::Error,
     request::{AuditLogReason, Request},
-    response::ResponseFuture,
     routing::Route,
 };
 use serde::Serialize;
 use twilight_model::{
     guild::scheduled_event::{EntityType, GuildScheduledEvent, PrivacyLevel},
     id::{
-        marker::{ChannelMarker, GuildMarker},
         Id,
+        marker::{ChannelMarker, GuildMarker},
     },
     util::Timestamp,
 };
 use twilight_validate::request::{
-    audit_reason as validate_audit_reason, scheduled_event_name as validate_scheduled_event_name,
-    ValidationError,
+    ValidationError, audit_reason as validate_audit_reason,
+    scheduled_event_name as validate_scheduled_event_name,
 };
 
 #[derive(Serialize)]
@@ -229,6 +230,7 @@ impl<'a> CreateGuildScheduledEvent<'a> {
         CreateGuildVoiceScheduledEvent::new(self, channel_id, name, scheduled_start_time)
     }
 
+    #[cfg(not(target_os = "wasi"))]
     fn exec(self) -> ResponseFuture<GuildScheduledEvent> {
         let http = self.http;
 

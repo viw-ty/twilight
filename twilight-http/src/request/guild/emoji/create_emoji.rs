@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
@@ -10,11 +11,11 @@ use std::future::IntoFuture;
 use twilight_model::{
     guild::Emoji,
     id::{
-        marker::{GuildMarker, RoleMarker},
         Id,
+        marker::{GuildMarker, RoleMarker},
     },
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 #[derive(Serialize)]
 struct CreateEmojiFields<'a> {
@@ -78,6 +79,7 @@ impl<'a> AuditLogReason<'a> for CreateEmoji<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateEmoji<'_> {
     type Output = Result<Response<Emoji>, Error>;
 

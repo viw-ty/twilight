@@ -1,12 +1,13 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Delete an invite by its code.
 ///
@@ -40,6 +41,7 @@ impl<'a> AuditLogReason<'a> for DeleteInvite<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteInvite<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

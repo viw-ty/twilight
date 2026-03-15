@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Nullable, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
@@ -10,11 +11,11 @@ use std::future::IntoFuture;
 use twilight_model::{
     guild::{Permissions, Role},
     id::{
-        marker::{GuildMarker, RoleMarker},
         Id,
+        marker::{GuildMarker, RoleMarker},
     },
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 #[derive(Serialize)]
 struct UpdateRoleFields<'a> {
@@ -23,7 +24,7 @@ struct UpdateRoleFields<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     hoist: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    icon: Option<&'a [u8]>,
+    icon: Option<Nullable<&'a str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     mentionable: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -31,7 +32,7 @@ struct UpdateRoleFields<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     permissions: Option<Permissions>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    unicode_emoji: Option<&'a str>,
+    unicode_emoji: Option<Nullable<&'a str>>,
 }
 
 /// Update a role by guild id and its id.
@@ -94,8 +95,38 @@ impl<'a> UpdateRole<'a> {
     /// See [Discord Docs/Image Data].
     ///
     /// [Discord Docs/Image Data]: https://discord.com/developers/docs/reference#image-data
-    pub const fn icon(mut self, icon: &'a [u8]) -> Self {
-        self.fields.icon = Some(icon);
+    ///
+    /// # Editing
+    ///
+    /// Pass [`None`] to clear the existing icon.
+    ///
+    /// **Warning**: If the existing unicode emoji isn't cleared when setting the icon, it might
+    /// cause incorrect behavior.
+    ///
+    /// # Examples
+    ///
+    /// Sets a role icon. The unicode emoji should always be cleared to ensure the icon can be
+    /// set correctly.
+    ///
+    /// ```no_run
+    /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use twilight_http::Client;
+    /// use twilight_model::id::Id;
+    ///
+    /// let client = Client::new("token".to_owned());
+    /// let guild_id = Id::new(1);
+    /// let role_id = Id::new(1);
+    /// let icon = "data:image/png;base64,BASE64_ENCODED_PNG_IMAGE_DATA";
+    ///
+    /// client
+    ///     .update_role(guild_id, role_id)
+    ///     .icon(Some(icon))
+    ///     .unicode_emoji(None)
+    ///     .await?;
+    /// # Ok(()) }
+    /// ```
+    pub const fn icon(mut self, icon: Option<&'a str>) -> Self {
+        self.fields.icon = Some(Nullable(icon));
 
         self
     }
@@ -122,8 +153,39 @@ impl<'a> UpdateRole<'a> {
     }
 
     /// Set the unicode emoji of a role.
-    pub const fn unicode_emoji(mut self, unicode_emoji: &'a str) -> Self {
-        self.fields.unicode_emoji = Some(unicode_emoji);
+    ///
+    /// Only works if the guild has the `ROLE_ICONS` feature.
+    ///
+    /// # Editing
+    ///
+    /// Pass [`None`] to clear the existing unicode emoji.
+    ///
+    /// **Warning**: If the existing icon isn't cleared when setting the unicode emoji, it might
+    /// cause incorrect behavior.
+    ///
+    /// # Examples
+    ///
+    /// Sets a role unicode emoji. The icon should always be cleared to ensure the unicode emoji
+    /// can be set correctly.
+    ///
+    /// ```no_run
+    /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use twilight_http::Client;
+    /// use twilight_model::id::Id;
+    ///
+    /// let client = Client::new("token".to_owned());
+    /// let guild_id = Id::new(1);
+    /// let role_id = Id::new(1);
+    ///
+    /// client
+    ///     .update_role(guild_id, role_id)
+    ///     .icon(None)
+    ///     .unicode_emoji(Some("🦀"))
+    ///     .await?;
+    /// # Ok(()) }
+    /// ```
+    pub const fn unicode_emoji(mut self, unicode_emoji: Option<&'a str>) -> Self {
+        self.fields.unicode_emoji = Some(Nullable(unicode_emoji));
 
         self
     }
@@ -137,6 +199,7 @@ impl<'a> AuditLogReason<'a> for UpdateRole<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateRole<'_> {
     type Output = Result<Response<Role>, Error>;
 

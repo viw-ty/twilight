@@ -2,14 +2,18 @@ use std::future::IntoFuture;
 
 use twilight_model::{
     application::monetization::Sku,
-    id::{marker::ApplicationMarker, Id},
+    id::{Id, marker::ApplicationMarker},
 };
 
 use crate::{
+    Client, Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, ResponseFuture},
     routing::Route,
-    Client, Error, Response,
+};
+#[cfg(not(target_os = "wasi"))]
+use crate::{
+    Response,
+    response::{ResponseFuture, marker::ListBody},
 };
 
 pub struct GetSKUs<'a> {
@@ -26,6 +30,7 @@ impl<'a> GetSKUs<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetSKUs<'_> {
     type Output = Result<Response<ListBody<Sku>>, Error>;
     type IntoFuture = ResponseFuture<ListBody<Sku>>;

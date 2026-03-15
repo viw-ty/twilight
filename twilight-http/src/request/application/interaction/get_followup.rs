@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::Message,
     id::{
-        marker::{ApplicationMarker, MessageMarker},
         Id,
+        marker::{ApplicationMarker, MessageMarker},
     },
 };
 
@@ -24,7 +25,7 @@ use twilight_model::{
 /// # #[tokio::main]
 /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use std::env;
-/// use twilight_http::{request::AuditLogReason, Client};
+/// use twilight_http::{Client, request::AuditLogReason};
 /// use twilight_model::id::Id;
 ///
 /// let client = Client::new(env::var("DISCORD_TOKEN")?);
@@ -60,6 +61,7 @@ impl<'a> GetFollowup<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetFollowup<'_> {
     type Output = Result<Response<Message>, Error>;
 
@@ -99,8 +101,8 @@ mod tests {
     use static_assertions::assert_impl_all;
     use std::error::Error;
     use twilight_model::id::{
-        marker::{ApplicationMarker, MessageMarker},
         Id,
+        marker::{ApplicationMarker, MessageMarker},
     };
 
     assert_impl_all!(GetFollowup<'_>: Send, Sync);
@@ -128,7 +130,6 @@ mod tests {
 
         assert!(expected.body().is_none());
         assert_eq!(expected.path(), actual.path());
-        assert_eq!(expected.ratelimit_path(), actual.ratelimit_path());
         assert_eq!(
             expected.use_authorization_token(),
             actual.use_authorization_token()

@@ -64,6 +64,7 @@ mod tests {
                 premium_type: None,
                 public_flags: None,
                 verified: None,
+                global_name: None,
             },
             version: 8,
         };

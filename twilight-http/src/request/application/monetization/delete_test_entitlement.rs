@@ -1,15 +1,19 @@
 use std::future::IntoFuture;
 
 use twilight_model::id::{
-    marker::{ApplicationMarker, EntitlementMarker},
     Id,
+    marker::{ApplicationMarker, EntitlementMarker},
 };
 
 use crate::{
+    Client, Error,
     request::{Request, TryIntoRequest},
-    response::{marker::EmptyBody, ResponseFuture},
     routing::Route,
-    Client, Error, Response,
+};
+#[cfg(not(target_os = "wasi"))]
+use crate::{
+    Response,
+    response::{ResponseFuture, marker::EmptyBody},
 };
 
 pub struct DeleteTestEntitlement<'a> {
@@ -32,6 +36,7 @@ impl<'a> DeleteTestEntitlement<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteTestEntitlement<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

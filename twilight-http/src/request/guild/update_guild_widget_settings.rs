@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Nullable, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
@@ -10,11 +11,11 @@ use std::future::IntoFuture;
 use twilight_model::{
     guild::widget::GuildWidgetSettings,
     id::{
-        marker::{ChannelMarker, GuildMarker},
         Id,
+        marker::{ChannelMarker, GuildMarker},
     },
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 #[derive(Serialize)]
 struct UpdateGuildWidgetSettingsFields {
@@ -73,6 +74,7 @@ impl<'a> AuditLogReason<'a> for UpdateGuildWidgetSettings<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateGuildWidgetSettings<'_> {
     type Output = Result<Response<GuildWidgetSettings>, Error>;
 

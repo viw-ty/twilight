@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     application::command::Command,
-    id::{marker::ApplicationMarker, Id},
+    id::{Id, marker::ApplicationMarker},
 };
 
 /// Retrieve all global commands for an application.
@@ -38,6 +39,7 @@ impl<'a> GetGlobalCommands<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetGlobalCommands<'_> {
     type Output = Result<Response<ListBody<Command>>, Error>;
 

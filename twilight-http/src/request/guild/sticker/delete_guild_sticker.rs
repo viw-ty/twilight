@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{GuildMarker, StickerMarker},
     Id,
+    marker::{GuildMarker, StickerMarker},
 };
 
 /// Deletes a guild sticker by the ID of the guild and its ID.
@@ -49,6 +50,7 @@ impl<'a> DeleteGuildSticker<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteGuildSticker<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

@@ -1,13 +1,14 @@
 use super::{CreateGuildScheduledEvent, CreateGuildScheduledEventFields};
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     error::Error,
     request::{AuditLogReason, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::scheduled_event::{EntityType, GuildScheduledEvent},
-    id::{marker::ChannelMarker, Id},
+    id::{Id, marker::ChannelMarker},
     util::Timestamp,
 };
 use twilight_validate::request::{
@@ -97,6 +98,7 @@ impl<'a> AuditLogReason<'a> for CreateGuildStageInstanceScheduledEvent<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateGuildStageInstanceScheduledEvent<'_> {
     type Output = Result<Response<GuildScheduledEvent>, Error>;
 

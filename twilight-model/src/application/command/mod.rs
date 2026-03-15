@@ -23,12 +23,15 @@ pub use self::{
 use crate::{
     guild::Permissions,
     id::{
-        marker::{ApplicationMarker, CommandMarker, CommandVersionMarker, GuildMarker},
         Id,
+        marker::{ApplicationMarker, CommandMarker, CommandVersionMarker, GuildMarker},
     },
+    oauth::ApplicationIntegrationType,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use super::interaction::InteractionContextType;
 
 /// Data sent to Discord to create a command.
 ///
@@ -41,17 +44,13 @@ use std::collections::HashMap;
 pub struct Command {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub application_id: Option<Id<ApplicationMarker>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contexts: Option<Vec<InteractionContextType>>,
     /// Default permissions required for a member to run the command.
     ///
     /// Setting this [`Permissions::empty()`] will prohibit anyone from running
     /// the command, except for guild administrators.
     pub default_member_permissions: Option<Permissions>,
-    /// Whether the command is available in DMs.
-    ///
-    /// This is only relevant for globally-scoped commands. By default, commands
-    /// are visible in DMs.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub dm_permission: Option<bool>,
     /// Description of the command.
     ///
     /// For [`User`] and [`Message`] commands, this will be an empty string.
@@ -66,11 +65,20 @@ pub struct Command {
     /// [Discord Docs/Localization]: https://discord.com/developers/docs/interactions/application-commands#localization
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description_localizations: Option<HashMap<String, String>>,
+    /// Whether the command is available in DMs.
+    ///
+    /// This is only relevant for globally-scoped commands. By default, commands
+    /// are visible in DMs.
+    #[deprecated(note = "use contexts instead")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dm_permission: Option<bool>,
     /// Guild ID of the command, if not global.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub guild_id: Option<Id<GuildMarker>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<Id<CommandMarker>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub integration_types: Option<Vec<ApplicationIntegrationType>>,
     #[serde(rename = "type")]
     pub kind: CommandType,
     pub name: String,
@@ -105,19 +113,21 @@ mod tests {
     use std::collections::HashMap;
 
     #[test]
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, deprecated)]
     fn command_option_full() {
         let value = Command {
             application_id: Some(Id::new(100)),
+            contexts: None,
             default_member_permissions: Some(Permissions::ADMINISTRATOR),
-            dm_permission: Some(false),
             description: "this command is a test".into(),
             description_localizations: Some(HashMap::from([(
                 "en-US".into(),
                 "this command is a test".into(),
             )])),
+            dm_permission: Some(false),
             guild_id: Some(Id::new(300)),
             id: Some(Id::new(200)),
+            integration_types: None,
             kind: CommandType::ChatInput,
             name: "test command".into(),
             name_localizations: Some(HashMap::from([("en-US".into(), "test command".into())])),
@@ -328,9 +338,6 @@ mod tests {
                 Token::Str("default_member_permissions"),
                 Token::Some,
                 Token::Str("8"),
-                Token::Str("dm_permission"),
-                Token::Some,
-                Token::Bool(false),
                 Token::Str("description"),
                 Token::Str("this command is a test"),
                 Token::Str("description_localizations"),
@@ -339,6 +346,9 @@ mod tests {
                 Token::Str("en-US"),
                 Token::Str("this command is a test"),
                 Token::MapEnd,
+                Token::Str("dm_permission"),
+                Token::Some,
+                Token::Bool(false),
                 Token::Str("guild_id"),
                 Token::Some,
                 Token::NewtypeStruct { name: "Id" },

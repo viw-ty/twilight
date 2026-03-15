@@ -4,6 +4,18 @@
 
 ### Bug Fixes
 
+- resolve clippy 1.86 lints ([#2426](https://github.com/twilight-rs/twilight/issues/2426))
+- doc_auto_cfg got merged into doc_cfg ([#2458](https://github.com/twilight-rs/twilight/issues/2458))
+
+### Chore
+
+- resolve rust 1.89 warnings ([#2442](https://github.com/twilight-rs/twilight/issues/2442))
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [unreleased]
+
+### Bug Fixes
+
 - Address clippy 1.75 lints ([#2305](https://github.com/twilight-rs/twilight/issues/2305))
 
 ### Build
@@ -17,6 +29,12 @@
 ### Refactor
 
 - Switch to fastrand and tokio-websockets ([#2239](https://github.com/twilight-rs/twilight/issues/2239))
+
+### Chore
+
+- resolve rust 1.83 issues ([#2391](https://github.com/twilight-rs/twilight/issues/2391))
+- Update tokio-websockets to 0.11 ([#2404](https://github.com/twilight-rs/twilight/issues/2404))
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
 
 ## [0.15.2] - 2023-09-10
 

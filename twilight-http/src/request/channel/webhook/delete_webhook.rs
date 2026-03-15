@@ -1,13 +1,14 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
-use twilight_model::id::{marker::WebhookMarker, Id};
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_model::id::{Id, marker::WebhookMarker};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 struct DeleteWebhookParams<'a> {
     token: Option<&'a str>,
@@ -48,6 +49,7 @@ impl<'a> AuditLogReason<'a> for DeleteWebhook<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteWebhook<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

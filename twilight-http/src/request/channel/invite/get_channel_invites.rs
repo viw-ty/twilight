@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::invite::Invite,
-    id::{marker::ChannelMarker, Id},
+    id::{Id, marker::ChannelMarker},
 };
 
 /// Get the invites for a guild channel.
@@ -29,6 +30,7 @@ impl<'a> GetChannelInvites<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetChannelInvites<'_> {
     type Output = Result<Response<ListBody<Invite>>, Error>;
 

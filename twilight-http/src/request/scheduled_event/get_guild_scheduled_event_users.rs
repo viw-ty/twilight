@@ -1,20 +1,21 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::scheduled_event::GuildScheduledEventUser,
     id::{
-        marker::{GuildMarker, ScheduledEventMarker, UserMarker},
         Id,
+        marker::{GuildMarker, ScheduledEventMarker, UserMarker},
     },
 };
 use twilight_validate::request::{
-    scheduled_event_get_users as validate_scheduled_event_get_users, ValidationError,
+    ValidationError, scheduled_event_get_users as validate_scheduled_event_get_users,
 };
 
 struct GetGuildScheduledEventUsersFields {
@@ -68,7 +69,7 @@ impl<'a> GetGuildScheduledEventUsers<'a> {
     /// also set.
     ///
     /// [`before`]: Self::before
-    pub fn after(mut self, after: Id<UserMarker>) -> Self {
+    pub const fn after(mut self, after: Id<UserMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.after = Some(after);
         }
@@ -81,7 +82,7 @@ impl<'a> GetGuildScheduledEventUsers<'a> {
     /// This is incompatible with [`after`].
     ///
     /// [`after`]: Self::after
-    pub fn before(mut self, before: Id<UserMarker>) -> Self {
+    pub const fn before(mut self, before: Id<UserMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.before = Some(before);
         }
@@ -111,7 +112,7 @@ impl<'a> GetGuildScheduledEventUsers<'a> {
     }
 
     /// Set whether to return member objects with each user.
-    pub fn with_member(mut self, with_member: bool) -> Self {
+    pub const fn with_member(mut self, with_member: bool) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.with_member = Some(with_member);
         }
@@ -120,6 +121,7 @@ impl<'a> GetGuildScheduledEventUsers<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetGuildScheduledEventUsers<'_> {
     type Output = Result<Response<ListBody<GuildScheduledEventUser>>, Error>;
 

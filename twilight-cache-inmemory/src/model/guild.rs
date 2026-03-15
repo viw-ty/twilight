@@ -4,13 +4,13 @@ use serde::Serialize;
 use twilight_model::{
     gateway::payload::incoming::GuildUpdate,
     guild::{
-        scheduled_event::GuildScheduledEvent, AfkTimeout, DefaultMessageNotificationLevel,
-        ExplicitContentFilter, Guild, GuildFeature, MfaLevel, NSFWLevel, Permissions, PremiumTier,
-        SystemChannelFlags, VerificationLevel,
+        AfkTimeout, DefaultMessageNotificationLevel, ExplicitContentFilter, Guild, GuildFeature,
+        MfaLevel, NSFWLevel, Permissions, PremiumTier, SystemChannelFlags, VerificationLevel,
+        scheduled_event::GuildScheduledEvent,
     },
     id::{
-        marker::{ApplicationMarker, ChannelMarker, GuildMarker, UserMarker},
         Id,
+        marker::{ApplicationMarker, ChannelMarker, GuildMarker, UserMarker},
     },
     util::{ImageHash, Timestamp},
 };
@@ -57,7 +57,7 @@ pub struct CachedGuild {
     pub(crate) splash: Option<ImageHash>,
     pub(crate) system_channel_flags: SystemChannelFlags,
     pub(crate) system_channel_id: Option<Id<ChannelMarker>>,
-    pub(crate) unavailable: bool,
+    pub(crate) unavailable: Option<bool>,
     pub(crate) vanity_url_code: Option<String>,
     pub(crate) verification_level: VerificationLevel,
     pub(crate) widget_channel_id: Option<Id<ChannelMarker>>,
@@ -123,6 +123,7 @@ impl CachedGuild {
     }
 
     /// Scheduled guild events.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn guild_scheduled_events(&self) -> &[GuildScheduledEvent] {
         &self.guild_scheduled_events
     }
@@ -182,6 +183,7 @@ impl CachedGuild {
     }
 
     /// Name of the guild.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -209,6 +211,7 @@ impl CachedGuild {
     /// Preferred locale for Community guilds.
     ///
     /// Used in server discovery and notices from Discord. Defaults to "en-US".
+    #[allow(clippy::missing_const_for_fn)]
     pub fn preferred_locale(&self) -> &str {
         &self.preferred_locale
     }
@@ -266,7 +269,7 @@ impl CachedGuild {
     }
 
     /// Whether the guild is unavailable due to an outage.
-    pub const fn unavailable(&self) -> bool {
+    pub const fn unavailable(&self) -> Option<bool> {
         self.unavailable
     }
 
@@ -436,7 +439,7 @@ impl CacheableGuild for CachedGuild {
         self.owner_id
     }
 
-    fn set_unavailable(&mut self, unavailable: bool) {
+    fn set_unavailable(&mut self, unavailable: Option<bool>) {
         self.unavailable = unavailable;
     }
 

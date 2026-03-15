@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::Message,
-    id::{marker::ApplicationMarker, Id},
+    id::{Id, marker::ApplicationMarker},
 };
 
 /// Get the original message, by its token.
@@ -21,7 +22,7 @@ use twilight_model::{
 /// # #[tokio::main]
 /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use std::env;
-/// use twilight_http::{request::AuditLogReason, Client};
+/// use twilight_http::{Client, request::AuditLogReason};
 /// use twilight_model::id::Id;
 ///
 /// let client = Client::new(env::var("DISCORD_TOKEN")?);
@@ -54,6 +55,7 @@ impl<'a> GetResponse<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetResponse<'_> {
     type Output = Result<Response<Message>, Error>;
 
@@ -84,7 +86,6 @@ impl TryIntoRequest for GetResponse<'_> {
 mod tests {
     use crate::{client::Client, request::TryIntoRequest};
     use std::error::Error;
-    use twilight_http_ratelimiting::Path;
     use twilight_model::id::Id;
 
     #[test]
@@ -99,10 +100,6 @@ mod tests {
             .try_into_request()?;
 
         assert!(!req.use_authorization_token());
-        assert_eq!(
-            &Path::WebhooksIdTokenMessagesId(application_id.get(), token),
-            req.ratelimit_path()
-        );
 
         Ok(())
     }

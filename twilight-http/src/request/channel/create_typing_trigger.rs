@@ -1,12 +1,13 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
-use twilight_model::id::{marker::ChannelMarker, Id};
+use twilight_model::id::{Id, marker::ChannelMarker};
 
 /// Fire a Typing Start event in the channel.
 #[must_use = "requests must be configured and executed"]
@@ -21,6 +22,7 @@ impl<'a> CreateTypingTrigger<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateTypingTrigger<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

@@ -1,15 +1,16 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Nullable, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{ChannelMarker, GuildMarker},
     Id,
+    marker::{ChannelMarker, GuildMarker},
 };
 
 #[derive(Serialize)]
@@ -87,6 +88,7 @@ impl<'a> UpdateCurrentUserVoiceState<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateCurrentUserVoiceState<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

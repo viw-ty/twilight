@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::guild::Guild;
-use twilight_validate::request::{guild_name as validate_guild_name, ValidationError};
+use twilight_validate::request::{ValidationError, guild_name as validate_guild_name};
 
 #[derive(Serialize)]
 struct CreateGuildFromTemplateFields<'a> {
@@ -56,7 +57,7 @@ impl<'a> CreateGuildFromTemplate<'a> {
     /// and `{data}` is the base64-encoded image. See [Discord Docs/Image Data].
     ///
     /// [Discord Docs/Image Data]: https://discord.com/developers/docs/reference#image-data
-    pub fn icon(mut self, icon: &'a str) -> Self {
+    pub const fn icon(mut self, icon: &'a str) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.icon = Some(icon);
         }
@@ -65,6 +66,7 @@ impl<'a> CreateGuildFromTemplate<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateGuildFromTemplate<'_> {
     type Output = Result<Response<Guild>, Error>;
 

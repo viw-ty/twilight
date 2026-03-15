@@ -1,16 +1,49 @@
 # Changelog
 
-## [unreleased]
+## [0.17.0] - 2025-11-08
+
+### Bug Fixes
+
+- resolve clippy 1.86 lints ([#2426](https://github.com/twilight-rs/twilight/issues/2426))
+- Quick Fix for Unnecessary Parentheses ([#2440](https://github.com/twilight-rs/twilight/issues/2440))
+- Some items were mistyped or private ([#2459](https://github.com/twilight-rs/twilight/issues/2459))
+- use smaller and unsigned integer for get-pins limit ([#2477](https://github.com/twilight-rs/twilight/issues/2477))
+
+### Features
+
+- Components V2 ([#2422](https://github.com/twilight-rs/twilight/issues/2422))
+- add support for new fields on modify_current_member ([#2473](https://github.com/twilight-rs/twilight/issues/2473))
+- [**breaking**] New modal components ([#2461](https://github.com/twilight-rs/twilight/issues/2461))
+- new pin endpoints and pagination for Get Channel Pins ([#2475](https://github.com/twilight-rs/twilight/issues/2475))
+
+### Chore
+
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [0.16.0] - 2025-01-12
+
+### Bug Fixes
+
+- Misleading error message validating commands. ([#2329](https://github.com/twilight-rs/twilight/issues/2329))
 
 ### Features
 
 - Implement additional select menu types ([#2219](https://github.com/twilight-rs/twilight/issues/2219))
 - Add `regex_patterns` and `allow_list` ([#2189](https://github.com/twilight-rs/twilight/issues/2189))
 - Implement select menu default values ([#2281](https://github.com/twilight-rs/twilight/issues/2281))
+- Add support for premium apps ([#2282](https://github.com/twilight-rs/twilight/issues/2282))
+- [**breaking**] Add support for super reaction types ([#2347](https://github.com/twilight-rs/twilight/issues/2347))
+- Implement Premium Button Style ([#2363](https://github.com/twilight-rs/twilight/issues/2363))
+- Implement user applications ([#2323](https://github.com/twilight-rs/twilight/issues/2323))
 
 ### Refactor
 
 - Remove redundant imports ([#2316](https://github.com/twilight-rs/twilight/issues/2316))
+
+### Chore
+
+- resolve rust 1.83 issues ([#2391](https://github.com/twilight-rs/twilight/issues/2391))
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
 
 ## [0.15.2] - 2023-09-10
 

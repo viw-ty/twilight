@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
@@ -10,12 +11,12 @@ use std::future::IntoFuture;
 use twilight_model::{
     application::command::permissions::CommandPermission,
     id::{
-        marker::{ApplicationMarker, CommandMarker, GuildMarker},
         Id,
+        marker::{ApplicationMarker, CommandMarker, GuildMarker},
     },
 };
 use twilight_validate::command::{
-    guild_permissions as validate_guild_permissions, CommandValidationError,
+    CommandValidationError, guild_permissions as validate_guild_permissions,
 };
 
 #[derive(Serialize)]
@@ -63,6 +64,7 @@ impl<'a> UpdateCommandPermissions<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateCommandPermissions<'_> {
     type Output = Result<Response<ListBody<CommandPermission>>, Error>;
 

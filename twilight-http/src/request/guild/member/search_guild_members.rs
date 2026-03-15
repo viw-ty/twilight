@@ -1,17 +1,18 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::Member,
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
 use twilight_validate::request::{
-    search_guild_members_limit as validate_search_guild_members_limit, ValidationError,
+    ValidationError, search_guild_members_limit as validate_search_guild_members_limit,
 };
 
 struct SearchGuildMembersFields<'a> {
@@ -87,6 +88,7 @@ impl<'a> SearchGuildMembers<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for SearchGuildMembers<'_> {
     type Output = Result<Response<ListBody<Member>>, Error>;
 

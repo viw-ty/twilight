@@ -1,9 +1,3 @@
-use serde::de::{Error as DeError, Visitor};
-use std::{
-    fmt::{Formatter, Result as FmtResult},
-    marker::PhantomData,
-};
-
 /// Deserializers for optional nullable fields.
 ///
 /// Some booleans in the Discord API are null when true, and not present when
@@ -20,7 +14,7 @@ pub mod null_boolean {
 
     struct NullBooleanVisitor;
 
-    impl<'de> Visitor<'de> for NullBooleanVisitor {
+    impl Visitor<'_> for NullBooleanVisitor {
         type Value = bool;
 
         fn expecting(&self, f: &mut Formatter<'_>) -> FmtResult {
@@ -61,9 +55,9 @@ pub mod null_boolean {
 pub mod zeroable_id {
     use crate::id::Id;
     use serde::{
+        Deserialize,
         de::{Deserializer, Error as DeError, Visitor},
         ser::Serializer,
-        Deserialize,
     };
     use std::{
         fmt::{Formatter, Result as FmtResult},
@@ -117,7 +111,7 @@ pub mod zeroable_id {
 
     // Clippy will say this bool can be taken by value, but we need it to be
     // passed by reference because that's what serde does.
-    #[allow(clippy::trivially_copy_pass_by_ref)]
+    #[allow(clippy::ref_option, clippy::trivially_copy_pass_by_ref)]
     pub fn serialize<S: Serializer, T>(
         value: &Option<Id<T>>,
         serializer: S,
@@ -135,37 +129,5 @@ pub mod zeroable_id {
         deserializer.deserialize_any(ZeroableIdVisitor::<T> {
             phantom: PhantomData,
         })
-    }
-}
-
-pub struct U16EnumVisitor<'a> {
-    description: &'a str,
-    phantom: PhantomData<u16>,
-}
-
-impl<'a> U16EnumVisitor<'a> {
-    pub const fn new(description: &'a str) -> Self {
-        Self {
-            description,
-            phantom: PhantomData,
-        }
-    }
-}
-
-impl<'de> Visitor<'de> for U16EnumVisitor<'_> {
-    type Value = u16;
-
-    fn expecting(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.write_str(self.description)
-    }
-
-    fn visit_u16<E: DeError>(self, value: u16) -> Result<Self::Value, E> {
-        Ok(value)
-    }
-
-    fn visit_u64<E: DeError>(self, value: u64) -> Result<Self::Value, E> {
-        let smaller = u16::try_from(value).map_err(E::custom)?;
-
-        self.visit_u16(smaller)
     }
 }

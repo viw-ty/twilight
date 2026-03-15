@@ -11,8 +11,9 @@ pub use self::{
     kind::EventType,
 };
 
-use super::{payload::incoming::*, CloseFrame};
-use crate::id::{marker::GuildMarker, Id};
+use super::{CloseFrame, payload::incoming::*};
+use crate::gateway::payload::incoming::rate_limited::RateLimitMetadata;
+use crate::id::{Id, marker::GuildMarker};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 
@@ -59,8 +60,8 @@ pub enum Event {
     /// Close message with an optional frame including information about the
     /// reason for the close.
     GatewayClose(Option<CloseFrame<'static>>),
-    /// A heartbeat was sent to or received from the gateway.
-    GatewayHeartbeat(u64),
+    /// A heartbeat was received from the gateway.
+    GatewayHeartbeat,
     /// A heartbeat acknowledgement was received from the gateway.
     GatewayHeartbeatAck,
     /// A "hello" packet was received from the gateway.
@@ -129,6 +130,8 @@ pub enum Event {
     MessageUpdate(Box<MessageUpdate>),
     /// A user's active presence (such as game or online status) was updated.
     PresenceUpdate(Box<PresenceUpdate>),
+    /// A shard was rate limited for a gateway opcode.
+    RateLimited(RateLimited),
     /// A reaction was added to a message.
     ReactionAdd(Box<ReactionAdd>),
     /// A reaction was removed from a message.
@@ -139,7 +142,7 @@ pub enum Event {
     /// removed.
     ReactionRemoveEmoji(ReactionRemoveEmoji),
     /// A shard is now "ready" and fully connected.
-    Ready(Box<Ready>),
+    Ready(Ready),
     /// A shard has successfully resumed.
     Resumed,
     /// A role was created in a guild.
@@ -221,10 +224,14 @@ impl Event {
             Event::MessageCreate(e) => e.0.guild_id,
             Event::MessageDelete(e) => e.guild_id,
             Event::MessageDeleteBulk(e) => e.guild_id,
-            Event::MessageUpdate(e) => e.guild_id,
+            Event::MessageUpdate(e) => e.0.guild_id,
             Event::MessagePollVoteAdd(e) => e.guild_id,
             Event::MessagePollVoteRemove(e) => e.guild_id,
             Event::PresenceUpdate(e) => Some(e.0.guild_id),
+            Event::RateLimited(RateLimited {
+                meta: RateLimitMetadata::RequestGuildMembers { guild_id, .. },
+                ..
+            }) => Some(*guild_id),
             Event::ReactionAdd(e) => e.0.guild_id,
             Event::ReactionRemove(e) => e.0.guild_id,
             Event::ReactionRemoveAll(e) => e.guild_id,
@@ -250,7 +257,7 @@ impl Event {
             | Event::EntitlementCreate(_)
             | Event::EntitlementDelete(_)
             | Event::EntitlementUpdate(_)
-            | Event::GatewayHeartbeat(_)
+            | Event::GatewayHeartbeat
             | Event::GatewayHeartbeatAck
             | Event::GatewayHello(_)
             | Event::GatewayInvalidateSession(_)
@@ -278,7 +285,7 @@ impl Event {
             Self::EntitlementDelete(_) => EventType::EntitlementDelete,
             Self::EntitlementUpdate(_) => EventType::EntitlementUpdate,
             Self::GatewayClose(_) => EventType::GatewayClose,
-            Self::GatewayHeartbeat(_) => EventType::GatewayHeartbeat,
+            Self::GatewayHeartbeat => EventType::GatewayHeartbeat,
             Self::GatewayHeartbeatAck => EventType::GatewayHeartbeatAck,
             Self::GatewayHello(_) => EventType::GatewayHello,
             Self::GatewayInvalidateSession(_) => EventType::GatewayInvalidateSession,
@@ -312,6 +319,7 @@ impl Event {
             Self::MessagePollVoteRemove(_) => EventType::MessagePollVoteRemove,
             Self::MessageUpdate(_) => EventType::MessageUpdate,
             Self::PresenceUpdate(_) => EventType::PresenceUpdate,
+            Self::RateLimited(_) => EventType::RateLimited,
             Self::ReactionAdd(_) => EventType::ReactionAdd,
             Self::ReactionRemove(_) => EventType::ReactionRemove,
             Self::ReactionRemoveAll(_) => EventType::ReactionRemoveAll,
@@ -393,6 +401,7 @@ impl From<DispatchEvent> for Event {
             DispatchEvent::MessagePollVoteRemove(v) => Self::MessagePollVoteRemove(v),
             DispatchEvent::MessageUpdate(v) => Self::MessageUpdate(v),
             DispatchEvent::PresenceUpdate(v) => Self::PresenceUpdate(v),
+            DispatchEvent::RateLimited(v) => Self::RateLimited(v),
             DispatchEvent::ReactionAdd(v) => Self::ReactionAdd(v),
             DispatchEvent::ReactionRemove(v) => Self::ReactionRemove(v),
             DispatchEvent::ReactionRemoveAll(v) => Self::ReactionRemoveAll(v),
@@ -422,7 +431,7 @@ impl From<GatewayEvent> for Event {
     fn from(event: GatewayEvent) -> Self {
         match event {
             GatewayEvent::Dispatch(_, e) => Self::from(e),
-            GatewayEvent::Heartbeat(interval) => Self::GatewayHeartbeat(interval),
+            GatewayEvent::Heartbeat => Self::GatewayHeartbeat,
             GatewayEvent::HeartbeatAck => Self::GatewayHeartbeatAck,
             GatewayEvent::Hello(interval) => Self::GatewayHello(interval),
             GatewayEvent::InvalidateSession(r) => Self::GatewayInvalidateSession(r),
@@ -464,7 +473,7 @@ impl Error for EventConversionError {}
 
 #[cfg(test)]
 mod tests {
-    //! `EVENT_THRESHOLD` is equivalent to 192 bytes. This was decided based on
+    //! `EVENT_THRESHOLD` is equivalent to 312 bytes. This was decided based on
     //! the size of `Event` at the time of writing. The assertions here are to
     //! ensure that in the case the events themselves grow or shrink past the
     //! threshold, they are properly boxed or unboxed respectively.
@@ -486,7 +495,7 @@ mod tests {
     // requires a variable to be used in a function, so this is a false
     // positive.
     #[allow(dead_code)]
-    const EVENT_THRESHOLD: usize = 256;
+    const EVENT_THRESHOLD: usize = 312;
 
     const_assert!(mem::size_of::<Event>() == EVENT_THRESHOLD);
 
@@ -509,12 +518,10 @@ mod tests {
     const_assert!(mem::size_of::<PresenceUpdate>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ReactionAdd>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ReactionRemove>() > EVENT_THRESHOLD);
-    const_assert!(mem::size_of::<Ready>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ThreadCreate>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ThreadMemberUpdate>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ThreadUpdate>() > EVENT_THRESHOLD);
     const_assert!(mem::size_of::<TypingStart>() > EVENT_THRESHOLD);
-    const_assert!(mem::size_of::<VoiceStateUpdate>() > EVENT_THRESHOLD);
 
     // Unboxed.
     const_assert!(mem::size_of::<AutoModerationRuleCreate>() <= EVENT_THRESHOLD);
@@ -533,9 +540,11 @@ mod tests {
     const_assert!(mem::size_of::<IntegrationDelete>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<InviteDelete>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<MemberChunk>() <= EVENT_THRESHOLD);
-    const_assert!(mem::size_of::<MemberRemove>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<MessageDelete>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<MessageDeleteBulk>() <= EVENT_THRESHOLD);
+    const_assert!(mem::size_of::<MemberRemove>() <= EVENT_THRESHOLD);
+    const_assert!(mem::size_of::<RateLimited>() <= EVENT_THRESHOLD);
+    const_assert!(mem::size_of::<Ready>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<ReactionRemoveAll>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<RoleCreate>() <= EVENT_THRESHOLD);
     const_assert!(mem::size_of::<RoleDelete>() <= EVENT_THRESHOLD);

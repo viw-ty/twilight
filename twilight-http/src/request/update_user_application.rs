@@ -1,13 +1,17 @@
 use std::future::IntoFuture;
 
 use serde::Serialize;
-use twilight_model::oauth::{Application, ApplicationFlags, InstallParams};
+use twilight_model::oauth::{
+    Application, ApplicationFlags, ApplicationIntegrationMap, ApplicationIntegrationTypeConfig,
+    InstallParams,
+};
 
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Nullable, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 
@@ -25,6 +29,8 @@ struct UpdateCurrentUserApplicationFields<'a> {
     icon: Option<Nullable<&'a str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     install_params: Option<InstallParams>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    integration_types_config: Option<ApplicationIntegrationMap<ApplicationIntegrationTypeConfig>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     interactions_endpoint_url: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,6 +83,7 @@ impl<'a> UpdateCurrentUserApplication<'a> {
                 flags: None,
                 icon: None,
                 install_params: None,
+                integration_types_config: None,
                 interactions_endpoint_url: None,
                 role_connections_verification_url: None,
                 tags: None,
@@ -129,6 +136,24 @@ impl<'a> UpdateCurrentUserApplication<'a> {
         self
     }
 
+    pub fn integrations_types_config(
+        mut self,
+        guild: Option<InstallParams>,
+        user: Option<InstallParams>,
+    ) -> Self {
+        let guild = guild.map(|g| ApplicationIntegrationTypeConfig {
+            oauth2_install_params: Some(g),
+        });
+
+        let user = user.map(|u| ApplicationIntegrationTypeConfig {
+            oauth2_install_params: Some(u),
+        });
+
+        self.fields.integration_types_config = Some(ApplicationIntegrationMap { guild, user });
+
+        self
+    }
+
     /// Sets the interactions endpoint URL of the application.
     pub const fn interactions_endpoint_url(mut self, interactions_endpoint_url: &'a str) -> Self {
         self.fields.interactions_endpoint_url = Some(interactions_endpoint_url);
@@ -154,6 +179,8 @@ impl<'a> UpdateCurrentUserApplication<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateCurrentUserApplication<'_> {
     type Output = Result<Response<Application>, Error>;
 

@@ -31,14 +31,14 @@
 //! [`InMemoryCachePermissions::check_member_communication_disabled`].
 //!
 //! [`ResourceType`]: crate::ResourceType
-//! [communication timed out until]: CachedMember::communication_disabled_until
+//! [communication disabled until]: crate::model::CachedMember::communication_disabled_until
 //! [current system time]: SystemTime::now
 //! [read-only permissions]: MEMBER_COMMUNICATION_DISABLED_ALLOWLIST
 
 use super::InMemoryCache;
 use crate::{
-    traits::{CacheableChannel, CacheableGuild, CacheableMember, CacheableRole},
     CacheableModels,
+    traits::{CacheableChannel, CacheableGuild, CacheableMember, CacheableRole},
 };
 use std::{
     error::Error,
@@ -46,11 +46,11 @@ use std::{
     time::{Duration, SystemTime},
 };
 use twilight_model::{
-    channel::{permission_overwrite::PermissionOverwrite, ChannelType},
+    channel::{ChannelType, permission_overwrite::PermissionOverwrite},
     guild::Permissions,
     id::{
-        marker::{ChannelMarker, GuildMarker, RoleMarker, UserMarker},
         Id,
+        marker::{ChannelMarker, GuildMarker, RoleMarker, UserMarker},
     },
 };
 use twilight_util::permission_calculator::PermissionCalculator;
@@ -648,7 +648,7 @@ mod tests {
     use super::{
         ChannelError, ChannelErrorType, InMemoryCachePermissions, RootError, RootErrorType,
     };
-    use crate::{test, DefaultCacheModels, DefaultInMemoryCache};
+    use crate::{DefaultCacheModels, DefaultInMemoryCache, test};
     use static_assertions::{assert_fields, assert_impl_all};
     use std::{
         error::Error,
@@ -658,8 +658,8 @@ mod tests {
     };
     use twilight_model::{
         channel::{
-            permission_overwrite::{PermissionOverwrite, PermissionOverwriteType},
             Channel, ChannelType,
+            permission_overwrite::{PermissionOverwrite, PermissionOverwriteType},
         },
         gateway::payload::incoming::{
             ChannelCreate, GuildCreate, MemberAdd, MemberUpdate, RoleCreate, ThreadCreate,
@@ -669,8 +669,8 @@ mod tests {
             NSFWLevel, Permissions, PremiumTier, Role, SystemChannelFlags, VerificationLevel,
         },
         id::{
-            marker::{ChannelMarker, GuildMarker, RoleMarker, UserMarker},
             Id,
+            marker::{ChannelMarker, GuildMarker, RoleMarker, UserMarker},
         },
         util::Timestamp,
     };
@@ -763,7 +763,7 @@ mod tests {
             system_channel_flags: SystemChannelFlags::SUPPRESS_JOIN_NOTIFICATIONS,
             threads: Vec::new(),
             rules_channel_id: None,
-            unavailable: false,
+            unavailable: Some(false),
             verification_level: VerificationLevel::VeryHigh,
             voice_states: Vec::new(),
             vanity_url_code: None,
@@ -934,6 +934,7 @@ mod tests {
             communication_disabled_until: None,
             guild_id: GUILD_ID,
             deaf: None,
+            flags: None,
             joined_at,
             mute: None,
             nick: None,
@@ -1122,6 +1123,7 @@ mod tests {
             communication_disabled_until: Some(in_past),
             guild_id: GUILD_ID,
             deaf: None,
+            flags: None,
             joined_at: Some(Timestamp::from_secs(1).unwrap()),
             mute: None,
             nick: None,

@@ -334,7 +334,7 @@ pub fn command(value: &Command) -> Result<(), CommandValidationError> {
         return Err(CommandValidationError {
             kind: CommandValidationErrorType::DescriptionNotAllowed,
         });
-    };
+    }
 
     if let Some(name_localizations) = name_localizations {
         for name in name_localizations.values() {
@@ -360,10 +360,10 @@ pub fn command(value: &Command) -> Result<(), CommandValidationError> {
 /// Calculate the total character count of a command.
 pub fn command_characters(command: &Command) -> usize {
     let mut characters =
-        longest_localization_characters(&command.name, &command.name_localizations)
+        longest_localization_characters(&command.name, command.name_localizations.as_ref())
             + longest_localization_characters(
                 &command.description,
-                &command.description_localizations,
+                command.description_localizations.as_ref(),
             );
 
     for option in &command.options {
@@ -377,9 +377,11 @@ pub fn command_characters(command: &Command) -> usize {
 pub fn option_characters(option: &CommandOption) -> usize {
     let mut characters = 0;
 
-    characters += longest_localization_characters(&option.name, &option.name_localizations);
-    characters +=
-        longest_localization_characters(&option.description, &option.description_localizations);
+    characters += longest_localization_characters(&option.name, option.name_localizations.as_ref());
+    characters += longest_localization_characters(
+        &option.description,
+        option.description_localizations.as_ref(),
+    );
 
     match option.kind {
         CommandOptionType::String => {
@@ -388,7 +390,7 @@ pub fn option_characters(option: &CommandOption) -> usize {
                     if let CommandOptionChoiceValue::String(string_choice) = &choice.value {
                         characters += longest_localization_characters(
                             &choice.name,
-                            &choice.name_localizations,
+                            choice.name_localizations.as_ref(),
                         ) + string_choice.len();
                     }
                 }
@@ -415,7 +417,7 @@ pub fn option_characters(option: &CommandOption) -> usize {
 /// instead.
 fn longest_localization_characters(
     default: &str,
-    localizations: &Option<HashMap<String, String>>,
+    localizations: Option<&HashMap<String, String>>,
 ) -> usize {
     let mut characters = default.len();
 
@@ -838,9 +840,11 @@ mod tests {
 
     // This tests [`description`] and [`name`] by proxy.
     #[test]
+    #[allow(deprecated)]
     fn command_length() {
         let valid_command = Command {
             application_id: Some(Id::new(1)),
+            contexts: None,
             default_member_permissions: None,
             dm_permission: None,
             description: "a".repeat(100),
@@ -850,6 +854,7 @@ mod tests {
             )])),
             guild_id: Some(Id::new(2)),
             id: Some(Id::new(3)),
+            integration_types: None,
             kind: CommandType::ChatInput,
             name: "b".repeat(32),
             name_localizations: Some(HashMap::from([("en-US".to_string(), "b".repeat(32))])),
@@ -908,6 +913,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(deprecated)]
     fn command_combined_limit() {
         let mut command = Command {
             application_id: Some(Id::new(1)),
@@ -993,6 +999,8 @@ mod tests {
                 required: None,
             }]),
             version: Id::new(4),
+            contexts: None,
+            integration_types: None,
         };
 
         assert_eq!(command_characters(&command), 660);

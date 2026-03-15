@@ -3,19 +3,21 @@ mod message;
 pub use self::message::CreateForumThreadMessage;
 
 use self::message::CreateForumThreadMessageFields;
+
+#[cfg(not(target_os = "wasi"))]
+use crate::response::ResponseFuture;
 use crate::{
     client::Client,
     error::Error,
-    request::{attachment::AttachmentManager, Nullable, Request},
-    response::ResponseFuture,
+    request::{Nullable, Request, attachment::AttachmentManager},
     routing::Route,
 };
 use serde::{Deserialize, Serialize};
 use twilight_model::{
-    channel::{thread::AutoArchiveDuration, Channel, Message},
+    channel::{Channel, Message, thread::AutoArchiveDuration},
     id::{
-        marker::{ChannelMarker, TagMarker},
         Id,
+        marker::{ChannelMarker, TagMarker},
     },
 };
 
@@ -108,6 +110,7 @@ impl<'a> CreateForumThread<'a> {
     /// Execute the request, returning a future resolving to a [`Response`].
     ///
     /// [`Response`]: crate::response::Response
+    #[cfg(not(target_os = "wasi"))]
     fn exec(self) -> ResponseFuture<ForumThread> {
         let http = self.http;
 
@@ -123,10 +126,10 @@ impl<'a> CreateForumThread<'a> {
         });
 
         // Set the default allowed mentions if required.
-        if self.fields.message.allowed_mentions.is_none() {
-            if let Some(allowed_mentions) = self.http.default_allowed_mentions() {
-                self.fields.message.allowed_mentions = Some(Nullable(Some(allowed_mentions)));
-            }
+        if self.fields.message.allowed_mentions.is_none()
+            && let Some(allowed_mentions) = self.http.default_allowed_mentions()
+        {
+            self.fields.message.allowed_mentions = Some(Nullable(Some(allowed_mentions)));
         }
 
         // Determine whether we need to use a multipart/form-data body or a JSON

@@ -1,17 +1,18 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::{
     guild::{Permissions, Role},
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 #[derive(Serialize)]
 struct CreateRoleFields<'a> {
@@ -149,6 +150,7 @@ impl<'a> AuditLogReason<'a> for CreateRole<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreateRole<'_> {
     type Output = Result<Response<Role>, Error>;
 

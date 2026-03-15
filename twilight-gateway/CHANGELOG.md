@@ -1,21 +1,75 @@
 # Changelog
 
-## [unreleased]
+## [0.17.1] - 2025-12-13
+
+### Bug Fixes
+
+- fix new clippy errors in the tests ([#2486](https://github.com/twilight-rs/twilight/issues/2486))
+
+### Features
+
+- add gateway ratelimited event ([#2483](https://github.com/twilight-rs/twilight/issues/2483))
+
+### Refactor
+
+- misc shard clean up ([#2468](https://github.com/twilight-rs/twilight/issues/2468))
+
+## [0.17.0] - 2025-11-08
+
+### Bug Fixes
+
+- resolve clippy 1.86 lints ([#2426](https://github.com/twilight-rs/twilight/issues/2426))
+- handle repeat recv errors ([#2428](https://github.com/twilight-rs/twilight/issues/2428))
+- resolve clippy 1.87 lints ([#2436](https://github.com/twilight-rs/twilight/issues/2436))
+- terminate zombied connections ([#2435](https://github.com/twilight-rs/twilight/issues/2435))
+- Add a connection timeout of 10s ([#2448](https://github.com/twilight-rs/twilight/issues/2448))
+- doc_auto_cfg got merged into doc_cfg ([#2458](https://github.com/twilight-rs/twilight/issues/2458))
+- Use precise capturing syntax ([#2478](https://github.com/twilight-rs/twilight/issues/2478))
+
+### Features
+
+- support `zstd-stream` ([#2400](https://github.com/twilight-rs/twilight/issues/2400))
+- [**breaking**] update & un-deprecate Zlib ([#2464](https://github.com/twilight-rs/twilight/issues/2464))
+
+### Refactor
+
+- remove instrument from shard::poll_next ([#2401](https://github.com/twilight-rs/twilight/issues/2401))
+
+### Chore
+
+- resolve rust 1.89 warnings ([#2442](https://github.com/twilight-rs/twilight/issues/2442))
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+- [**breaking**] bump deps ([#2463](https://github.com/twilight-rs/twilight/issues/2463))
+
+## [0.16.0] - 2025-01-12
 
 ### Bug Fixes
 
 - Address new rust CI errors ([#2285](https://github.com/twilight-rs/twilight/issues/2285))
+- Add missing flag to `EventTypeFlags::GUILD_MESSAGES` ([#2332](https://github.com/twilight-rs/twilight/issues/2332))
+- Don't swallow close frames ([#2399](https://github.com/twilight-rs/twilight/issues/2399))
 
 ### Build
 
 - Update to rustls 0.22, tokio-websockets 0.5 ([#2302](https://github.com/twilight-rs/twilight/issues/2302))
 - [**breaking**] Rename native feature to native-tls ([#2308](https://github.com/twilight-rs/twilight/issues/2308))
+- Update to rustls 0.23 ([#2367](https://github.com/twilight-rs/twilight/issues/2367))
+- Update tokio-websockets to 0.11 ([#2404](https://github.com/twilight-rs/twilight/issues/2404))
 
 ### Features
 
 - [**breaking**] Reduce size of gateway rest models ([#2168](https://github.com/twilight-rs/twilight/issues/2168))
 - [**breaking**] Turn `Queue` into a generic type ([#2249](https://github.com/twilight-rs/twilight/issues/2249))
 - [**breaking**] Impl Stream for Shard ([#2309](https://github.com/twilight-rs/twilight/issues/2309))
+- Allow setting initial resume_url ([#2325](https://github.com/twilight-rs/twilight/issues/2325))
+- Add support for premium apps ([#2282](https://github.com/twilight-rs/twilight/issues/2282))
+- Add support for polls ([#2341](https://github.com/twilight-rs/twilight/issues/2341))
+- [**breaking**] Swallow WebSocket errors ([#2360](https://github.com/twilight-rs/twilight/issues/2360))
+
+### Performance
+
+- Lazily allocate errors ([#2390](https://github.com/twilight-rs/twilight/issues/2390))
+- Optimize `CommandRatelimiter` size ([#2395](https://github.com/twilight-rs/twilight/issues/2395))
 
 ### Refactor
 
@@ -24,6 +78,15 @@
 - [**breaking**] Remove undocumented gateway events ([#2237](https://github.com/twilight-rs/twilight/issues/2237))
 - [**breaking**] Changes for compatibility with twilight-gateway-queue rewrite ([#2228](https://github.com/twilight-rs/twilight/issues/2228))
 - Switch to fastrand and tokio-websockets ([#2239](https://github.com/twilight-rs/twilight/issues/2239))
+- Reuse 'now' instant for `poll_acquire` ([#2393](https://github.com/twilight-rs/twilight/issues/2393))
+- Split sending into a separate method ([#2397](https://github.com/twilight-rs/twilight/issues/2397))
+- Avoid recent latencies rotate ([#2396](https://github.com/twilight-rs/twilight/issues/2396))
+
+### Chore
+
+- Resolve rust 1.83 issues ([#2391](https://github.com/twilight-rs/twilight/issues/2391))
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
+- Fix clippy 1.84 lints ([#2409](https://github.com/twilight-rs/twilight/issues/2409))
 
 ## [0.15.3] - 2023-09-10
 

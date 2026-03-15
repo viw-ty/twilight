@@ -1,19 +1,20 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::GuildPrune,
     id::{
-        marker::{GuildMarker, RoleMarker},
         Id,
+        marker::{GuildMarker, RoleMarker},
     },
 };
-use twilight_validate::request::{guild_prune_days as validate_guild_prune_days, ValidationError};
+use twilight_validate::request::{ValidationError, guild_prune_days as validate_guild_prune_days};
 
 struct GetGuildPruneCountFields<'a> {
     days: Option<u16>,
@@ -63,7 +64,7 @@ impl<'a> GetGuildPruneCount<'a> {
     }
 
     /// List of roles to include when calculating prune count
-    pub fn include_roles(mut self, roles: &'a [Id<RoleMarker>]) -> Self {
+    pub const fn include_roles(mut self, roles: &'a [Id<RoleMarker>]) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.include_roles = roles;
         }
@@ -72,6 +73,7 @@ impl<'a> GetGuildPruneCount<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetGuildPruneCount<'_> {
     type Output = Result<Response<GuildPrune>, Error>;
 
@@ -102,7 +104,7 @@ impl TryIntoRequest for GetGuildPruneCount<'_> {
 #[cfg(test)]
 mod tests {
     use super::GetGuildPruneCount;
-    use crate::{request::TryIntoRequest, Client};
+    use crate::{Client, request::TryIntoRequest};
     use twilight_model::id::Id;
 
     #[test]

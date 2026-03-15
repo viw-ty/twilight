@@ -1,17 +1,18 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
     user::CurrentUserGuild,
 };
 use twilight_validate::request::{
-    get_current_user_guilds_limit as validate_get_current_user_guilds_limit, ValidationError,
+    ValidationError, get_current_user_guilds_limit as validate_get_current_user_guilds_limit,
 };
 
 struct GetCurrentUserGuildsFields {
@@ -64,7 +65,7 @@ impl<'a> GetCurrentUserGuilds<'a> {
     }
 
     /// Get guilds after this guild id.
-    pub fn after(mut self, guild_id: Id<GuildMarker>) -> Self {
+    pub const fn after(mut self, guild_id: Id<GuildMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.after = Some(guild_id);
         }
@@ -73,7 +74,7 @@ impl<'a> GetCurrentUserGuilds<'a> {
     }
 
     /// Get guilds before this guild id.
-    pub fn before(mut self, guild_id: Id<GuildMarker>) -> Self {
+    pub const fn before(mut self, guild_id: Id<GuildMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.before = Some(guild_id);
         }
@@ -105,6 +106,7 @@ impl<'a> GetCurrentUserGuilds<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetCurrentUserGuilds<'_> {
     type Output = Result<Response<ListBody<CurrentUserGuild>>, Error>;
 

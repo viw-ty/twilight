@@ -36,8 +36,8 @@ use twilight_model::{
         payload::incoming::{MessageCreate, ReactionAdd},
     },
     id::{
-        marker::{ChannelMarker, GuildMarker, MessageMarker},
         Id,
+        marker::{ChannelMarker, GuildMarker, MessageMarker},
     },
 };
 
@@ -171,14 +171,14 @@ impl Standby {
 
         match event {
             Event::InteractionCreate(e) => {
-                if e.kind == InteractionType::MessageComponent {
-                    if let Some(message) = &e.message {
-                        completions.add_with(&Self::process_specific_event(
-                            &self.components,
-                            message.id,
-                            e,
-                        ));
-                    }
+                if e.kind == InteractionType::MessageComponent
+                    && let Some(message) = &e.message
+                {
+                    completions.add_with(&Self::process_specific_event(
+                        &self.components,
+                        message.id,
+                        e,
+                    ));
                 }
             }
             Event::MessageCreate(e) => {
@@ -777,6 +777,7 @@ impl Standby {
 
     /// Process a general event that is either of a particular type or in a
     /// particular guild.
+    #[allow(clippy::needless_pass_by_value)]
     #[tracing::instrument(level = "trace")]
     fn process_specific_event<
         K: Debug + Display + Eq + Hash + PartialEq + 'static,
@@ -1002,14 +1003,14 @@ impl ProcessResults {
     }
 
     /// Add another set of results to this set.
-    fn add_with(&mut self, other: &Self) {
+    const fn add_with(&mut self, other: &Self) {
         self.dropped = self.dropped.saturating_add(other.dropped);
         self.fulfilled = self.fulfilled.saturating_add(other.fulfilled);
         self.sent = self.sent.saturating_add(other.sent);
     }
 
     /// Handle a process status.
-    fn handle(&mut self, status: ProcessStatus) {
+    const fn handle(&mut self, status: ProcessStatus) {
         match status {
             ProcessStatus::Dropped => {
                 self.dropped += 1;
@@ -1062,26 +1063,27 @@ mod tests {
     use twilight_gateway::{Event, EventType};
     use twilight_model::{
         application::interaction::{
-            message_component::MessageComponentInteractionData, Interaction, InteractionData,
-            InteractionType,
+            Interaction, InteractionData, InteractionType,
+            message_component::MessageComponentInteractionData,
         },
         channel::{
-            message::{component::ComponentType, EmojiReactionType, Message, MessageType},
             Channel, ChannelType,
+            message::{EmojiReactionType, Message, MessageType, component::ComponentType},
         },
         gateway::{
-            payload::incoming::{InteractionCreate, MessageCreate, ReactionAdd, Ready, RoleDelete},
             GatewayReaction, ShardId,
+            payload::incoming::{InteractionCreate, MessageCreate, ReactionAdd, Ready, RoleDelete},
         },
         guild::Permissions,
-        id::{marker::GuildMarker, Id},
-        oauth::{ApplicationFlags, PartialApplication},
+        id::{Id, marker::GuildMarker},
+        oauth::{ApplicationFlags, ApplicationIntegrationMap, PartialApplication},
         user::{CurrentUser, User},
         util::Timestamp,
     };
 
     assert_impl_all!(Standby: Debug, Default, Send, Sync);
 
+    #[allow(deprecated)]
     fn message() -> Message {
         Message {
             activity: None,
@@ -1104,6 +1106,7 @@ mod tests {
                 mfa_enabled: None,
                 name: "twilight".to_owned(),
                 premium_type: None,
+                primary_guild: None,
                 public_flags: None,
                 system: None,
                 verified: None,
@@ -1118,6 +1121,7 @@ mod tests {
             guild_id: Some(Id::new(4)),
             id: Id::new(3),
             interaction: None,
+            interaction_metadata: None,
             kind: MessageType::Regular,
             member: None,
             mention_channels: Vec::new(),
@@ -1160,6 +1164,10 @@ mod tests {
         Interaction {
             app_permissions: Some(Permissions::SEND_MESSAGES),
             application_id: Id::new(1),
+            authorizing_integration_owners: ApplicationIntegrationMap {
+                guild: None,
+                user: None,
+            },
             channel: Some(Channel {
                 bitrate: None,
                 guild_id: None,
@@ -1198,6 +1206,7 @@ mod tests {
                 video_quality_mode: None,
             }),
             channel_id: None,
+            context: None,
             data: Some(InteractionData::MessageComponent(Box::new(
                 MessageComponentInteractionData {
                     custom_id: String::from("Click"),
@@ -1207,6 +1216,7 @@ mod tests {
                 },
             ))),
             entitlements: Vec::new(),
+            guild: None,
             guild_id: Some(Id::new(3)),
             guild_locale: None,
             id: Id::new(4),
@@ -1231,6 +1241,7 @@ mod tests {
                 mfa_enabled: None,
                 name: "twilight".to_owned(),
                 premium_type: None,
+                primary_guild: None,
                 public_flags: None,
                 system: None,
                 verified: None,
@@ -1399,14 +1410,15 @@ mod tests {
                 public_flags: None,
                 flags: None,
                 locale: None,
+                global_name: None,
             },
             version: 6,
         };
-        let event = Event::Ready(Box::new(ready));
+        let event = Event::Ready(ready);
 
         let standby = Standby::new();
         let wait = standby.wait_for_event(|event: &Event| match event {
-            Event::Ready(ready) => ready.shard.map_or(false, |id| id.number() == 5),
+            Event::Ready(ready) => ready.shard.is_some_and(|id| id.number() == 5),
             _ => false,
         });
         assert!(!standby.events.is_empty());

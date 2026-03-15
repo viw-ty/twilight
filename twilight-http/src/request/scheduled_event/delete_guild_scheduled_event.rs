@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::scheduled_event::GuildScheduledEvent,
     id::{
-        marker::{GuildMarker, ScheduledEventMarker},
         Id,
+        marker::{GuildMarker, ScheduledEventMarker},
     },
 };
 
@@ -53,6 +54,7 @@ impl<'a> DeleteGuildScheduledEvent<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteGuildScheduledEvent<'_> {
     type Output = Result<Response<GuildScheduledEvent>, Error>;
 

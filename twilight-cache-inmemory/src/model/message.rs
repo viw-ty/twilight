@@ -4,21 +4,20 @@ use serde::Serialize;
 use twilight_model::{
     application::interaction::InteractionType,
     channel::{
-        message::{
-            sticker::MessageSticker, Component, Embed, Message, MessageActivity,
-            MessageApplication, MessageCall, MessageFlags, MessageInteraction, MessageReference,
-            MessageSnapshot, MessageType, Reaction, RoleSubscriptionData,
-        },
         Attachment, ChannelMention,
+        message::{
+            Component, Embed, Message, MessageActivity, MessageApplication, MessageCall,
+            MessageFlags, MessageInteraction, MessageReference, MessageSnapshot, MessageType,
+            Reaction, RoleSubscriptionData, sticker::MessageSticker,
+        },
     },
-    gateway::payload::incoming::MessageUpdate,
     guild::PartialMember,
     id::{
+        Id,
         marker::{
             ApplicationMarker, ChannelMarker, GuildMarker, InteractionMarker, MessageMarker,
             RoleMarker, UserMarker, WebhookMarker,
         },
-        Id,
     },
     poll::Poll,
     util::Timestamp,
@@ -48,6 +47,7 @@ impl CachedMessageInteraction {
     }
 
     /// Name of the interaction used.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn name(&self) -> &str {
         &self.name
     }
@@ -152,6 +152,7 @@ impl CachedMessage {
     /// receiving the attachments of messages.
     ///
     /// [`Message::attachments`]: twilight_model::channel::Message::attachments
+    #[allow(clippy::missing_const_for_fn)]
     pub fn attachments(&self) -> &[Attachment] {
         &self.attachments
     }
@@ -174,6 +175,7 @@ impl CachedMessage {
     /// receiving the components of messages.
     ///
     /// [`Message::components`]: twilight_model::channel::Message::components
+    #[allow(clippy::missing_const_for_fn)]
     pub fn components(&self) -> &[Component] {
         &self.components
     }
@@ -184,6 +186,7 @@ impl CachedMessage {
     /// receiving the content of messages.
     ///
     /// [`Message::content`]: twilight_model::channel::Message::content
+    #[allow(clippy::missing_const_for_fn)]
     pub fn content(&self) -> &str {
         &self.content
     }
@@ -199,6 +202,7 @@ impl CachedMessage {
     /// receiving the embeds of messages.
     ///
     /// [`Message::embeds`]: twilight_model::channel::Message::embeds
+    #[allow(clippy::missing_const_for_fn)]
     pub fn embeds(&self) -> &[Embed] {
         &self.embeds
     }
@@ -234,6 +238,7 @@ impl CachedMessage {
     }
 
     /// Channels mentioned in the content.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn mention_channels(&self) -> &[ChannelMention] {
         &self.mention_channels
     }
@@ -244,11 +249,13 @@ impl CachedMessage {
     }
 
     /// Roles mentioned in the content.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn mention_roles(&self) -> &[Id<RoleMarker>] {
         &self.mention_roles
     }
 
     /// Users mentioned in the content.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn mentions(&self) -> &[Id<UserMarker>] {
         &self.mentions
     }
@@ -259,6 +266,7 @@ impl CachedMessage {
     }
 
     /// Reactions to the message.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn reactions(&self) -> &[Reaction] {
         &self.reactions
     }
@@ -275,6 +283,7 @@ impl CachedMessage {
     }
 
     /// Stickers within the message.
+    #[allow(clippy::missing_const_for_fn)]
     pub fn sticker_items(&self) -> &[MessageSticker] {
         &self.sticker_items
     }
@@ -301,6 +310,7 @@ impl CachedMessage {
 }
 
 impl From<Message> for CachedMessage {
+    #[allow(deprecated)]
     fn from(message: Message) -> Self {
         let Message {
             activity,
@@ -318,6 +328,7 @@ impl From<Message> for CachedMessage {
             guild_id,
             id,
             interaction,
+            interaction_metadata: _,
             kind,
             member,
             mention_channels,
@@ -376,6 +387,7 @@ impl From<Message> for CachedMessage {
 }
 
 impl PartialEq<Message> for CachedMessage {
+    #[allow(deprecated)]
     fn eq(&self, other: &Message) -> bool {
         self.id == other.id
             && self.activity == other.activity
@@ -398,7 +410,7 @@ impl PartialEq<Message> for CachedMessage {
                     other
                         .interaction
                         .as_ref()
-                        .map_or(false, |other_interaction| interaction == other_interaction)
+                        .is_some_and(|other_interaction| interaction == other_interaction)
                 })
             && self.kind == other.kind
             && self.member == other.member
@@ -424,48 +436,6 @@ impl PartialEq<Message> for CachedMessage {
 }
 
 impl CacheableMessage for CachedMessage {
-    fn update_with_message_update(&mut self, message_update: &MessageUpdate) {
-        if let Some(attachments) = &message_update.attachments {
-            self.attachments.clone_from(attachments);
-        }
-
-        if let Some(content) = &message_update.content {
-            self.content.clone_from(content);
-        }
-
-        if let Some(edited_timestamp) = message_update.edited_timestamp {
-            self.edited_timestamp.replace(edited_timestamp);
-        }
-
-        if let Some(embeds) = &message_update.embeds {
-            self.embeds.clone_from(embeds);
-        }
-
-        if let Some(mention_everyone) = message_update.mention_everyone {
-            self.mention_everyone = mention_everyone;
-        }
-
-        if let Some(mention_roles) = &message_update.mention_roles {
-            self.mention_roles.clone_from(mention_roles);
-        }
-
-        if let Some(mentions) = &message_update.mentions {
-            self.mentions = mentions.iter().map(|x| x.id).collect::<Vec<_>>();
-        }
-
-        if let Some(pinned) = message_update.pinned {
-            self.pinned = pinned;
-        }
-
-        if let Some(timestamp) = message_update.timestamp {
-            self.timestamp = timestamp;
-        }
-
-        if let Some(tts) = message_update.tts {
-            self.tts = tts;
-        }
-    }
-
     fn reactions(&self) -> &[Reaction] {
         &self.reactions
     }

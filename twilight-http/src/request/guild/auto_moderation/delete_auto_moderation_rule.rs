@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{AutoModerationRuleMarker, GuildMarker},
     Id,
+    marker::{AutoModerationRuleMarker, GuildMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Delete an auto moderation rule in a guild.
 ///
@@ -48,6 +49,7 @@ impl<'a> AuditLogReason<'a> for DeleteAutoModerationRule<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteAutoModerationRule<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

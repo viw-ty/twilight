@@ -1,20 +1,21 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::audit_log::{AuditLog, AuditLogEventType},
     id::{
-        marker::{GuildMarker, UserMarker},
         Id,
+        marker::{GuildMarker, UserMarker},
     },
 };
 use twilight_validate::request::{
-    get_guild_audit_log_limit as validate_get_guild_audit_log_limit, ValidationError,
+    ValidationError, get_guild_audit_log_limit as validate_get_guild_audit_log_limit,
 };
 
 struct GetAuditLogFields {
@@ -74,7 +75,7 @@ impl<'a> GetAuditLog<'a> {
     }
 
     /// Filter by an action type.
-    pub fn action_type(mut self, action_type: AuditLogEventType) -> Self {
+    pub const fn action_type(mut self, action_type: AuditLogEventType) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.action_type = Some(action_type);
         }
@@ -83,7 +84,7 @@ impl<'a> GetAuditLog<'a> {
     }
 
     /// Get audit log entries after the entry specified.
-    pub fn after(mut self, after: u64) -> Self {
+    pub const fn after(mut self, after: u64) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.after = Some(after);
         }
@@ -92,7 +93,7 @@ impl<'a> GetAuditLog<'a> {
     }
 
     /// Get audit log entries before the entry specified.
-    pub fn before(mut self, before: u64) -> Self {
+    pub const fn before(mut self, before: u64) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.before = Some(before);
         }
@@ -124,7 +125,7 @@ impl<'a> GetAuditLog<'a> {
     /// Filter audit log for entries from a user.
     ///
     /// This is the user who did the auditable action, not the target of the auditable action.
-    pub fn user_id(mut self, user_id: Id<UserMarker>) -> Self {
+    pub const fn user_id(mut self, user_id: Id<UserMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.user_id = Some(user_id);
         }
@@ -133,6 +134,7 @@ impl<'a> GetAuditLog<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetAuditLog<'_> {
     type Output = Result<Response<AuditLog>, Error>;
 

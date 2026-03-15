@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::{Role, RolePosition},
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Modify the position of the roles.
 ///
@@ -46,6 +47,7 @@ impl<'a> AuditLogReason<'a> for UpdateRolePositions<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateRolePositions<'_> {
     type Output = Result<Response<ListBody<Role>>, Error>;
 

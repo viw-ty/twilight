@@ -1,15 +1,16 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::{
     channel::Channel,
-    id::{marker::UserMarker, Id},
+    id::{Id, marker::UserMarker},
 };
 
 #[derive(Serialize)]
@@ -33,6 +34,7 @@ impl<'a> CreatePrivateChannel<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for CreatePrivateChannel<'_> {
     type Output = Result<Response<Channel>, Error>;
 

@@ -15,6 +15,7 @@ use std::time::{Duration, Instant};
 #[derive(Clone, Debug)]
 pub struct Latency {
     /// Sum of recorded latencies.
+    #[allow(clippy::struct_field_names)]
     latency_sum: Duration,
     /// Number of recorded heartbeat periods.
     periods: u32,
@@ -100,7 +101,7 @@ impl Latency {
         self.periods += 1;
 
         self.latency_sum += period_latency;
-        self.recent.rotate_right(1);
+        self.recent.copy_within(..Self::RECENT_LEN - 1, 1);
         self.recent[0] = period_latency;
     }
 

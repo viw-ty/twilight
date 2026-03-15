@@ -1,4 +1,4 @@
-use crate::{config::ResourceType, CacheableMessage, CacheableModels, InMemoryCache, UpdateCache};
+use crate::{CacheableModels, InMemoryCache, UpdateCache, config::ResourceType};
 use std::borrow::Cow;
 use twilight_model::gateway::payload::incoming::{
     MessageCreate, MessageDelete, MessageDeleteBulk, MessageUpdate,
@@ -28,10 +28,10 @@ impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for MessageCreate {
         // requested then we pop a message ID out. Once we have the popped ID we
         // can remove it from the message cache. This prevents the cache from
         // filling up with old messages that aren't in any channel cache.
-        if channel_messages.len() >= cache.config.message_cache_size() {
-            if let Some(popped_id) = channel_messages.pop_back() {
-                cache.messages.remove(&popped_id);
-            }
+        if channel_messages.len() >= cache.config.message_cache_size()
+            && let Some(popped_id) = channel_messages.pop_back()
+        {
+            cache.messages.remove(&popped_id);
         }
 
         channel_messages.push_front(self.0.id);
@@ -80,13 +80,45 @@ impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for MessageDeleteBul
 
 impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for MessageUpdate {
     fn update(&self, cache: &InMemoryCache<CacheModels>) {
+        if cache.wants(ResourceType::USER) {
+            cache.cache_user(Cow::Borrowed(&self.author), self.guild_id);
+        }
+
+        if let (Some(member), Some(guild_id), true) = (
+            &self.member,
+            self.guild_id,
+            cache.wants(ResourceType::MEMBER),
+        ) {
+            cache.cache_borrowed_partial_member(guild_id, member, self.author.id);
+        }
+
         if !cache.wants(ResourceType::MESSAGE) {
             return;
         }
 
-        if let Some(mut message) = cache.messages.get_mut(&self.id) {
-            message.update_with_message_update(self);
+        // In special cases, this message was popped out due to the limitation
+        // of the message cache capacity, or its Event::MessageCreate was missed.
+        // If that is the case, we do not only add it to the message cache but
+        // also add its ID to the channel messages cache.
+        if cache
+            .messages
+            .insert(self.id, CacheModels::Message::from(self.0.clone()))
+            .is_some()
+        {
+            return;
         }
+
+        let mut channel_messages = cache.channel_messages.entry(self.0.channel_id).or_default();
+
+        // If this channel cache is full, we pop an message ID out of
+        // the channel cache and also remove it from the message cache.
+        if channel_messages.len() >= cache.config.message_cache_size()
+            && let Some(popped_id) = channel_messages.pop_back()
+        {
+            cache.messages.remove(&popped_id);
+        }
+
+        channel_messages.push_front(self.0.id);
     }
 }
 
@@ -99,9 +131,10 @@ mod tests {
         guild::{MemberFlags, PartialMember},
         id::Id,
         user::User,
-        util::{image_hash::ImageHashParseError, ImageHash, Timestamp},
+        util::{ImageHash, Timestamp, image_hash::ImageHashParseError},
     };
 
+    #[allow(deprecated)]
     #[test]
     fn message_create() -> Result<(), ImageHashParseError> {
         let joined_at = Some(Timestamp::from_secs(1_632_072_645).expect("non zero"));
@@ -133,6 +166,7 @@ mod tests {
                 mfa_enabled: None,
                 name: "test".to_owned(),
                 premium_type: None,
+                primary_guild: None,
                 public_flags: None,
                 system: None,
                 verified: None,
@@ -147,9 +181,12 @@ mod tests {
             guild_id: Some(Id::new(1)),
             id: Id::new(4),
             interaction: None,
+            interaction_metadata: None,
             kind: MessageType::Regular,
             member: Some(PartialMember {
                 avatar: None,
+                avatar_decoration_data: None,
+                banner: None,
                 communication_disabled_until: None,
                 deaf: false,
                 flags,
@@ -170,11 +207,11 @@ mod tests {
             poll: None,
             reactions: Vec::new(),
             reference: None,
+            referenced_message: None,
             role_subscription_data: None,
             sticker_items: Vec::new(),
-            thread: None,
-            referenced_message: None,
             timestamp: Timestamp::from_secs(1_632_072_645).expect("non zero"),
+            thread: None,
             tts: false,
             webhook_id: None,
         };

@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
@@ -11,11 +12,11 @@ use twilight_model::{
     guild::Permissions,
     http::permission_overwrite::{PermissionOverwrite, PermissionOverwriteType},
     id::{
-        marker::{ChannelMarker, GenericMarker},
         Id,
+        marker::{ChannelMarker, GenericMarker},
     },
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 #[derive(Serialize)]
 struct UpdateChannelPermissionFields {
@@ -95,6 +96,7 @@ impl<'a> AuditLogReason<'a> for UpdateChannelPermission<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateChannelPermission<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

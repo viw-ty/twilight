@@ -1,6 +1,21 @@
 # Changelog
 
-## [unreleased]
+## [0.17.0] - 2025-11-08
+
+### Bug Fixes
+
+- Add global_name to CurrentUser ([#2412](https://github.com/twilight-rs/twilight/issues/2412))
+- resolve clippy 1.87 lints ([#2436](https://github.com/twilight-rs/twilight/issues/2436))
+
+### Features
+
+- [**breaking**] support for role colors and primary guilds ([#2467](https://github.com/twilight-rs/twilight/issues/2467))
+
+### Chore
+
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [0.16.0] - 2025-01-12
 
 ### Bug Fixes
 
@@ -9,6 +24,22 @@
 ### Build
 
 - Remove dependency on futures-util ([#2309](https://github.com/twilight-rs/twilight/issues/2309))
+
+### Features
+
+- Add support for premium apps ([#2282](https://github.com/twilight-rs/twilight/issues/2282))
+- add avatar decoration data ([#2343](https://github.com/twilight-rs/twilight/issues/2343))
+- [**breaking**] Add support for super reaction types ([#2347](https://github.com/twilight-rs/twilight/issues/2347))
+- add support for polls ([#2341](https://github.com/twilight-rs/twilight/issues/2341))
+- add call field to messages ([#2344](https://github.com/twilight-rs/twilight/issues/2344))
+- Add support for message forwarding ([#2340](https://github.com/twilight-rs/twilight/issues/2340))
+- Implement user applications ([#2323](https://github.com/twilight-rs/twilight/issues/2323))
+- Add guild field to interaction. ([#2383](https://github.com/twilight-rs/twilight/issues/2383))
+
+### Chore
+
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
+- Fix clippy 1.84 lints ([#2409](https://github.com/twilight-rs/twilight/issues/2409))
 
 ## [0.15.3] - 2023-09-10
 

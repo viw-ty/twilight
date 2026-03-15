@@ -1,17 +1,18 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::{
-    channel::{stage_instance::PrivacyLevel, StageInstance},
-    id::{marker::ChannelMarker, Id},
+    channel::{StageInstance, stage_instance::PrivacyLevel},
+    id::{Id, marker::ChannelMarker},
 };
-use twilight_validate::request::{stage_topic as validate_stage_topic, ValidationError};
+use twilight_validate::request::{ValidationError, stage_topic as validate_stage_topic};
 
 #[derive(Serialize)]
 struct UpdateStageInstanceFields<'a> {
@@ -44,7 +45,7 @@ impl<'a> UpdateStageInstance<'a> {
     }
 
     /// Set the [`PrivacyLevel`] of the instance.
-    pub fn privacy_level(mut self, privacy_level: PrivacyLevel) -> Self {
+    pub const fn privacy_level(mut self, privacy_level: PrivacyLevel) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.privacy_level = Some(privacy_level);
         }
@@ -71,6 +72,7 @@ impl<'a> UpdateStageInstance<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateStageInstance<'_> {
     type Output = Result<Response<StageInstance>, Error>;
 

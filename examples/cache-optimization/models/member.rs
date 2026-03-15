@@ -1,11 +1,11 @@
-use twilight_cache_inmemory::{model::ComputedInteractionMember, CacheableMember};
+use twilight_cache_inmemory::{CacheableMember, model::ComputedInteractionMember};
 use twilight_model::{
     application::interaction::InteractionMember,
     gateway::payload::incoming::MemberUpdate,
     guild::{Member, PartialMember},
     id::{
-        marker::{RoleMarker, UserMarker},
         Id,
+        marker::{RoleMarker, UserMarker},
     },
     util::{ImageHash, Timestamp},
 };
@@ -58,7 +58,7 @@ impl PartialEq<PartialMember> for MinimalCachedMember {
         other
             .user
             .as_ref()
-            .map_or(false, |user| user.id == self.user_id)
+            .is_some_and(|user| user.id == self.user_id)
             && self.roles == other.roles
             && self.avatar == other.avatar
     }

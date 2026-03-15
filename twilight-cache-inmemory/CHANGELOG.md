@@ -1,11 +1,44 @@
 # Changelog
 
-## [unreleased]
+## [0.17.1] - 2025-12-13
+
+### Features
+
+- add gateway ratelimited event ([#2483](https://github.com/twilight-rs/twilight/issues/2483))
+
+## [0.17.0] - 2025-11-08
 
 ### Bug Fixes
 
-- Address new rust CI errors ([#2285](https://github.com/twilight-rs/twilight/issues/2285))
-- [**breaking**] `Member#joined_at` can sometimes be null ([#2288](https://github.com/twilight-rs/twilight/issues/2288))
+- Add global_name to CurrentUser ([#2412](https://github.com/twilight-rs/twilight/issues/2412))
+- update User on MemberUpdate ([#2417](https://github.com/twilight-rs/twilight/issues/2417))
+- [**breaking**] incoming heartbeat has null data ([#2420](https://github.com/twilight-rs/twilight/issues/2420))
+- resolve clippy 1.86 lints ([#2426](https://github.com/twilight-rs/twilight/issues/2426))
+- resolve clippy 1.87 lints ([#2436](https://github.com/twilight-rs/twilight/issues/2436))
+- doc_auto_cfg got merged into doc_cfg ([#2458](https://github.com/twilight-rs/twilight/issues/2458))
+
+### Features
+
+- [**breaking**] support for role colors and primary guilds ([#2467](https://github.com/twilight-rs/twilight/issues/2467))
+- add missing fields to Member ([#2476](https://github.com/twilight-rs/twilight/issues/2476))
+
+### Chore
+
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [0.16.0] - 2025-01-12
+
+### Bug Fixes
+
+- [**breaking**] `Member#joined_at` can sometimes be null
+  ([#2288](https://github.com/twilight-rs/twilight/issues/2288))
+- Deserialize unavailable guilds in
+  GUILD_CREATE. ([#2330](https://github.com/twilight-rs/twilight/issues/2330))
+- Add `flags` field to MemberUpdate payload
+  ([#2265](https://github.com/twilight-rs/twilight/issues/2265))
+- Make it possible to tell the difference between a guild becoming
+  available and joining a new guild
+  ([#2377](https://github.com/twilight-rs/twilight/issues/2377))
 
 ### Build
 
@@ -13,13 +46,36 @@
 
 ### Features
 
-- [**breaking**] Implement additional select menu types ([#2219](https://github.com/twilight-rs/twilight/issues/2219))
-- [**breaking**] Add support for super reactions ([#2275](https://github.com/twilight-rs/twilight/issues/2275))
-- [**breaking**] Make the cache generic over model-specific traits ([#2179](https://github.com/twilight-rs/twilight/issues/2179))
+All new features added are [**breaking**].
+
+- Implement additional select menu types ([#2219](https://github.com/twilight-rs/twilight/issues/2219))
+- Add support for super reactions ([#2275](https://github.com/twilight-rs/twilight/issues/2275))
+- Make the cache generic over model-specific traits ([#2179](https://github.com/twilight-rs/twilight/issues/2179))
+- Add support for premium apps ([#2282](https://github.com/twilight-rs/twilight/issues/2282))
+- Add avatar decoration data ([#2343](https://github.com/twilight-rs/twilight/issues/2343))
+- Add support for super reaction types ([#2347](https://github.com/twilight-rs/twilight/issues/2347))
+- Add support for polls ([#2341](https://github.com/twilight-rs/twilight/issues/2341))
+- Add call field to messages ([#2344](https://github.com/twilight-rs/twilight/issues/2344))
+- Add support for message forwarding ([#2340](https://github.com/twilight-rs/twilight/issues/2340))
+- Add guild_scheduled_events to guild struct ([#2371](https://github.com/twilight-rs/twilight/issues/2371))
+- Add max_stage_video_channel_users ([#2152](https://github.com/twilight-rs/twilight/issues/2152))
+- Implement user applications ([#2323](https://github.com/twilight-rs/twilight/issues/2323))
+- Add guild field to interaction. ([#2383](https://github.com/twilight-rs/twilight/issues/2383))
 
 ### Refactor
 
 - [**breaking**] Remove undocumented gateway events ([#2237](https://github.com/twilight-rs/twilight/issues/2237))
+- A full message object for `MessageUpdate` event ([#2387](https://github.com/twilight-rs/twilight/issues/2387))
+
+### Chore
+
+- Address new rust CI errors ([#2285](https://github.com/twilight-rs/twilight/issues/2285))
+- Resolved some warnings when building docs. ([#2331](https://github.com/twilight-rs/twilight/issues/2331))
+- Updated to Clippy 1.78 lints ([#2336](https://github.com/twilight-rs/twilight/issues/2336))
+- [**breaking**] Bump MSRV to 1.79 and resolve Clippy 1.80 lints ([#2366](https://github.com/twilight-rs/twilight/issues/2366))
+- Resolve rust 1.83 issues ([#2391](https://github.com/twilight-rs/twilight/issues/2391))
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
+- Fix clippy 1.84 lints ([#2409](https://github.com/twilight-rs/twilight/issues/2409))
 
 ## [0.15.3] - 2023-09-10
 

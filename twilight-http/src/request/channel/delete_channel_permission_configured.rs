@@ -1,13 +1,14 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
-use twilight_model::id::{marker::ChannelMarker, Id};
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_model::id::{Id, marker::ChannelMarker};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Clear the permissions for a target ID in a channel.
 ///
@@ -43,6 +44,7 @@ impl<'a> AuditLogReason<'a> for DeleteChannelPermissionConfigured<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteChannelPermissionConfigured<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

@@ -6,8 +6,8 @@
 use std::fmt;
 
 use serde::{
-    de::{Error, Unexpected, Visitor},
     Deserialize,
+    de::{Error, Unexpected, Visitor},
 };
 
 /// Struct that will only serialize from the bool specified as `T`.
@@ -20,7 +20,7 @@ impl<'de, const T: bool> Deserialize<'de> for MustBeBool<T> {
     {
         struct MustBeBoolVisitor(bool);
 
-        impl<'de> Visitor<'de> for MustBeBoolVisitor {
+        impl Visitor<'_> for MustBeBoolVisitor {
             type Value = ();
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

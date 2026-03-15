@@ -1,16 +1,17 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{GuildMarker, RoleMarker, UserMarker},
     Id,
+    marker::{GuildMarker, RoleMarker, UserMarker},
 };
-use twilight_validate::request::{audit_reason as validate_audit_reason, ValidationError};
+use twilight_validate::request::{ValidationError, audit_reason as validate_audit_reason};
 
 /// Remove a role from a member in a guild, by id.
 #[must_use = "requests must be configured and executed"]
@@ -47,6 +48,7 @@ impl<'a> AuditLogReason<'a> for RemoveRoleFromMember<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for RemoveRoleFromMember<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

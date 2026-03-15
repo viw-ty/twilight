@@ -1,19 +1,20 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::{
     guild::template::Template,
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
 use twilight_validate::request::{
-    template_description as validate_template_description, template_name as validate_template_name,
-    ValidationError,
+    ValidationError, template_description as validate_template_description,
+    template_name as validate_template_name,
 };
 
 #[derive(Serialize)]
@@ -91,6 +92,7 @@ impl<'a> UpdateTemplate<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateTemplate<'_> {
     type Output = Result<Response<Template>, Error>;
 

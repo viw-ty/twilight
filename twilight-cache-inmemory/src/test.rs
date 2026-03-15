@@ -1,28 +1,29 @@
 use crate::DefaultInMemoryCache;
+use twilight_model::guild::RoleColors;
 use twilight_model::{
     channel::{
-        message::{
-            sticker::{Sticker, StickerFormatType, StickerType},
-            EmojiReactionType, Message, MessageFlags, MessageType,
-        },
         Channel, ChannelType,
+        message::{
+            EmojiReactionType, Message, MessageFlags, MessageType,
+            sticker::{Sticker, StickerFormatType, StickerType},
+        },
     },
     gateway::{
-        payload::incoming::{MessageCreate, ReactionAdd},
         GatewayReaction,
+        payload::incoming::{MessageCreate, ReactionAdd},
     },
     guild::{
-        scheduled_event::{EntityType, GuildScheduledEvent, PrivacyLevel, Status},
         AfkTimeout, DefaultMessageNotificationLevel, Emoji, ExplicitContentFilter, Guild, Member,
         MemberFlags, MfaLevel, NSFWLevel, PartialMember, Permissions, PremiumTier, Role, RoleFlags,
         SystemChannelFlags, VerificationLevel,
+        scheduled_event::{EntityType, GuildScheduledEvent, PrivacyLevel, Status},
     },
     id::{
+        Id,
         marker::{
             ChannelMarker, EmojiMarker, GuildMarker, RoleMarker, ScheduledEventMarker,
             StickerMarker, UserMarker,
         },
-        Id,
     },
     user::{CurrentUser, User},
     util::{ImageHash, Timestamp},
@@ -33,7 +34,7 @@ pub fn cache() -> DefaultInMemoryCache {
     DefaultInMemoryCache::new()
 }
 
-#[allow(clippy::too_many_lines)]
+#[allow(clippy::too_many_lines, deprecated)]
 pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
     let joined_at = Some(Timestamp::from_secs(1_632_072_645).expect("non zero"));
     let cache = DefaultInMemoryCache::new();
@@ -61,6 +62,7 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
             mfa_enabled: None,
             name: "test".to_owned(),
             premium_type: None,
+            primary_guild: None,
             public_flags: None,
             system: None,
             verified: None,
@@ -75,9 +77,12 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
         guild_id: Some(Id::new(1)),
         id: Id::new(4),
         interaction: None,
+        interaction_metadata: None,
         kind: MessageType::Regular,
         member: Some(PartialMember {
             avatar: None,
+            avatar_decoration_data: None,
+            banner: None,
             communication_disabled_until: None,
             deaf: false,
             flags,
@@ -98,11 +103,11 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
         poll: None,
         reactions: Vec::new(),
         reference: None,
+        referenced_message: None,
         role_subscription_data: None,
         sticker_items: Vec::new(),
-        thread: None,
-        referenced_message: None,
         timestamp: Timestamp::from_secs(1_632_072_645).expect("non zero"),
+        thread: None,
         tts: false,
         webhook_id: None,
     };
@@ -119,6 +124,8 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
         guild_id: Some(Id::new(1)),
         member: Some(Member {
             avatar: None,
+            avatar_decoration_data: None,
+            banner: None,
             communication_disabled_until: None,
             deaf: false,
             flags,
@@ -144,6 +151,7 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
                 mfa_enabled: None,
                 name: "test".to_owned(),
                 premium_type: None,
+                primary_guild: None,
                 public_flags: None,
                 system: None,
                 verified: None,
@@ -161,6 +169,8 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
 
     reaction.member.replace(Member {
         avatar: None,
+        avatar_decoration_data: None,
+        banner: None,
         communication_disabled_until: None,
         deaf: false,
         flags,
@@ -186,6 +196,7 @@ pub fn cache_with_message_and_reactions() -> DefaultInMemoryCache {
             mfa_enabled: None,
             name: "test".to_owned(),
             premium_type: None,
+            primary_guild: None,
             public_flags: None,
             system: None,
             verified: None,
@@ -228,6 +239,7 @@ pub fn current_user(id: u64) -> CurrentUser {
         public_flags: None,
         flags: None,
         locale: None,
+        global_name: None,
     }
 }
 
@@ -294,6 +306,8 @@ pub fn member(id: Id<UserMarker>) -> Member {
 
     Member {
         avatar: None,
+        avatar_decoration_data: None,
+        banner: None,
         communication_disabled_until: None,
         deaf: false,
         flags,
@@ -309,7 +323,13 @@ pub fn member(id: Id<UserMarker>) -> Member {
 
 pub fn role(id: Id<RoleMarker>) -> Role {
     Role {
+        #[allow(deprecated)]
         color: 0,
+        colors: RoleColors {
+            primary_color: 0,
+            secondary_color: None,
+            tertiary_color: None,
+        },
         hoist: false,
         icon: None,
         id,
@@ -382,6 +402,7 @@ pub fn user(id: Id<UserMarker>) -> User {
         mfa_enabled: None,
         name: "user".to_owned(),
         premium_type: None,
+        primary_guild: None,
         public_flags: None,
         system: None,
         verified: None,
@@ -435,7 +456,7 @@ pub fn guild(id: Id<GuildMarker>, member_count: Option<u64>) -> Guild {
         system_channel_flags: SystemChannelFlags::empty(),
         system_channel_id: None,
         threads: Vec::new(),
-        unavailable: false,
+        unavailable: Some(false),
         vanity_url_code: None,
         verification_level: VerificationLevel::VeryHigh,
         voice_states: Vec::new(),

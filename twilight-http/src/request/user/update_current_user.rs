@@ -1,15 +1,16 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{self, AuditLogReason, Nullable, Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use serde::Serialize;
 use std::future::IntoFuture;
 use twilight_model::user::User;
 use twilight_validate::request::{
-    audit_reason as validate_audit_reason, username as validate_username, ValidationError,
+    ValidationError, audit_reason as validate_audit_reason, username as validate_username,
 };
 
 #[derive(Serialize)]
@@ -53,7 +54,7 @@ impl<'a> UpdateCurrentUser<'a> {
     /// and `{data}` is the base64-encoded image. See [Discord Docs/Image Data].
     ///
     /// [Discord Docs/Image Data]: https://discord.com/developers/docs/reference#image-data
-    pub fn avatar(mut self, avatar: Option<&'a str>) -> Self {
+    pub const fn avatar(mut self, avatar: Option<&'a str>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.avatar = Some(Nullable(avatar));
         }
@@ -68,7 +69,7 @@ impl<'a> UpdateCurrentUser<'a> {
     /// and `{data}` is the base64-encoded image. See [Discord Docs/Image Data].
     ///
     /// [Discord Docs/Image Data]: https://discord.com/developers/docs/reference#image-data
-    pub fn banner(mut self, banner: Option<&'a str>) -> Self {
+    pub const fn banner(mut self, banner: Option<&'a str>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.banner = Some(Nullable(banner));
         }
@@ -106,6 +107,7 @@ impl<'a> AuditLogReason<'a> for UpdateCurrentUser<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateCurrentUser<'_> {
     type Output = Result<Response<User>, Error>;
 

@@ -1,22 +1,23 @@
 use super::RequestReactionType;
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::message::ReactionType,
     id::{
-        marker::{ChannelMarker, MessageMarker, UserMarker},
         Id,
+        marker::{ChannelMarker, MessageMarker, UserMarker},
     },
     user::User,
 };
 use twilight_validate::request::{
-    get_reactions_limit as validate_get_reactions_limit, ValidationError,
+    ValidationError, get_reactions_limit as validate_get_reactions_limit,
 };
 
 struct GetReactionsFields {
@@ -59,7 +60,7 @@ impl<'a> GetReactions<'a> {
     }
 
     /// Get users after this id.
-    pub fn after(mut self, after: Id<UserMarker>) -> Self {
+    pub const fn after(mut self, after: Id<UserMarker>) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.after = Some(after);
         }
@@ -92,7 +93,7 @@ impl<'a> GetReactions<'a> {
     /// Set the kind of reaction to retrieve.
     ///
     /// This can be either a super reaction or a normal reaction.
-    pub fn kind(mut self, kind: ReactionType) -> Self {
+    pub const fn kind(mut self, kind: ReactionType) -> Self {
         if let Ok(fields) = self.fields.as_mut() {
             fields.kind = Some(kind);
         }
@@ -101,6 +102,7 @@ impl<'a> GetReactions<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetReactions<'_> {
     type Output = Result<Response<ListBody<User>>, Error>;
 

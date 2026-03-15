@@ -1,8 +1,9 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
@@ -48,6 +49,7 @@ impl<'a> GetCurrentAuthorizationInformation<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetCurrentAuthorizationInformation<'_> {
     type Output = Result<Response<CurrentAuthorizationInformation>, Error>;
 
@@ -77,7 +79,7 @@ mod tests {
     use crate::{client::Client, request::TryIntoRequest};
     use static_assertions::assert_impl_all;
     use std::{error::Error, future::IntoFuture};
-    use twilight_http_ratelimiting::{Method, Path};
+    use twilight_http_ratelimiting::Method;
 
     assert_impl_all!(GetCurrentAuthorizationInformation<'_>: IntoFuture, Send, Sync, TryIntoRequest);
 
@@ -91,7 +93,6 @@ mod tests {
         assert!(req.form().is_none());
         assert!(req.headers().is_none());
         assert_eq!(Method::Get, req.method());
-        assert_eq!(&Path::OauthMe, req.ratelimit_path());
 
         Ok(())
     }

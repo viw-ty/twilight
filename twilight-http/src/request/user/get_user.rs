@@ -1,13 +1,14 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
-    id::{marker::UserMarker, Id},
+    id::{Id, marker::UserMarker},
     user::User,
 };
 
@@ -24,6 +25,7 @@ impl<'a> GetUser<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetUser<'_> {
     type Output = Result<Response<User>, Error>;
 

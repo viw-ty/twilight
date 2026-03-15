@@ -3,6 +3,7 @@
 #![allow(
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
+    clippy::result_large_err,
     clippy::unnecessary_wraps
 )]
 
@@ -19,4 +20,6 @@ mod query_formatter;
 /// Discord API version used by this crate.
 pub const API_VERSION: u8 = 10;
 
-pub use crate::{client::Client, error::Error, response::Response};
+#[cfg(not(target_os = "wasi"))]
+pub use crate::response::Response;
+pub use crate::{client::Client, error::Error};

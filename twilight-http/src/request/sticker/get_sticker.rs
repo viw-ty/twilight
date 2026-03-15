@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::message::sticker::Sticker,
-    id::{marker::StickerMarker, Id},
+    id::{Id, marker::StickerMarker},
 };
 
 /// Returns a single sticker by its ID.
@@ -39,6 +40,7 @@ impl<'a> GetSticker<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetSticker<'_> {
     type Output = Result<Response<Sticker>, Error>;
 

@@ -3,16 +3,17 @@ use std::future::IntoFuture;
 use twilight_model::{
     guild::Emoji,
     id::{
-        marker::{ApplicationMarker, EmojiMarker},
         Id,
+        marker::{ApplicationMarker, EmojiMarker},
     },
 };
 
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
-    request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
-    routing::Route,
     Client, Error,
+    request::{Request, TryIntoRequest},
+    routing::Route,
 };
 
 #[derive(Serialize)]
@@ -43,6 +44,7 @@ impl<'a> UpdateApplicationEmoji<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for UpdateApplicationEmoji<'_> {
     type Output = Result<Response<Emoji>, Error>;
 

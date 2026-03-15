@@ -36,6 +36,7 @@ mod premium_tier;
 mod preview;
 mod prune;
 mod role;
+mod role_colors;
 mod role_flags;
 mod role_position;
 mod role_tags;
@@ -55,26 +56,26 @@ pub use self::{
     integration_expire_behavior::IntegrationExpireBehavior, integration_type::GuildIntegrationType,
     member::Member, member_flags::MemberFlags, mfa_level::MfaLevel, partial_guild::PartialGuild,
     partial_member::PartialMember, premium_tier::PremiumTier, preview::GuildPreview,
-    prune::GuildPrune, role::Role, role_flags::RoleFlags, role_position::RolePosition,
-    role_tags::RoleTags, system_channel_flags::SystemChannelFlags,
+    prune::GuildPrune, role::Role, role_colors::RoleColors, role_flags::RoleFlags,
+    role_position::RolePosition, role_tags::RoleTags, system_channel_flags::SystemChannelFlags,
     unavailable_guild::UnavailableGuild, vanity_url::VanityUrl,
     verification_level::VerificationLevel, widget::GuildWidget,
 };
 
 use super::gateway::presence::PresenceListDeserializer;
 use crate::{
-    channel::{message::sticker::Sticker, Channel, StageInstance},
+    channel::{Channel, StageInstance, message::sticker::Sticker},
     gateway::presence::Presence,
     id::{
-        marker::{ApplicationMarker, ChannelMarker, GuildMarker, UserMarker},
         Id,
+        marker::{ApplicationMarker, ChannelMarker, GuildMarker, UserMarker},
     },
     util::{ImageHash, Timestamp},
     voice::VoiceState,
 };
 use serde::{
-    de::{Deserializer, Error as DeError, IgnoredAny, MapAccess, Visitor},
     Deserialize, Serialize,
+    de::{Deserializer, Error as DeError, IgnoredAny, MapAccess, Visitor},
 };
 use std::fmt::{Formatter, Result as FmtResult};
 
@@ -152,8 +153,15 @@ pub struct Guild {
     pub system_channel_id: Option<Id<ChannelMarker>>,
     #[serde(default)]
     pub threads: Vec<Channel>,
-    #[serde(default)]
-    pub unavailable: bool,
+    /// If the guild is unavailable.
+    ///
+    /// # Note:
+    ///
+    /// While it is not documented and may change in the future if
+    /// this field is not sent it is because the user joined a new
+    /// guild.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unavailable: Option<bool>,
     pub vanity_url_code: Option<String>,
     pub verification_level: VerificationLevel,
     #[serde(default)]
@@ -721,7 +729,6 @@ impl<'de> Deserialize<'de> for Guild {
                 let stickers = stickers.unwrap_or_default();
                 let system_channel_id = system_channel_id.unwrap_or_default();
                 let mut threads = threads.unwrap_or_default();
-                let unavailable = unavailable.unwrap_or_default();
                 let vanity_url_code = vanity_url_code.unwrap_or_default();
                 let mut voice_states = voice_states.unwrap_or_default();
                 let widget_channel_id = widget_channel_id.unwrap_or_default();
@@ -917,7 +924,7 @@ mod tests {
             system_channel_flags: SystemChannelFlags::SUPPRESS_PREMIUM_SUBSCRIPTIONS,
             system_channel_id: Some(Id::new(7)),
             threads: Vec::new(),
-            unavailable: false,
+            unavailable: None,
             vanity_url_code: Some("twilight".to_owned()),
             verification_level: VerificationLevel::Medium,
             voice_states: Vec::new(),
@@ -930,7 +937,7 @@ mod tests {
             &[
                 Token::Struct {
                     name: "Guild",
-                    len: 48,
+                    len: 47,
                 },
                 Token::Str("afk_channel_id"),
                 Token::Some,
@@ -1053,8 +1060,6 @@ mod tests {
                 Token::Str("threads"),
                 Token::Seq { len: Some(0) },
                 Token::SeqEnd,
-                Token::Str("unavailable"),
-                Token::Bool(false),
                 Token::Str("vanity_url_code"),
                 Token::Some,
                 Token::Str("twilight"),

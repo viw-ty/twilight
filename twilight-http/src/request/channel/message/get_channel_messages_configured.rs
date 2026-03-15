@@ -1,20 +1,21 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::ListBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::ListBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     channel::Message,
     id::{
-        marker::{ChannelMarker, MessageMarker},
         Id,
+        marker::{ChannelMarker, MessageMarker},
     },
 };
 use twilight_validate::request::{
-    get_channel_messages_limit as validate_get_channel_messages_limit, ValidationError,
+    ValidationError, get_channel_messages_limit as validate_get_channel_messages_limit,
 };
 
 struct GetChannelMessagesConfiguredFields {
@@ -79,6 +80,7 @@ impl<'a> GetChannelMessagesConfigured<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetChannelMessagesConfigured<'_> {
     type Output = Result<Response<ListBody<Message>>, Error>;
 

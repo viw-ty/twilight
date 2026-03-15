@@ -1,4 +1,4 @@
-use crate::{config::ResourceType, CacheableModels, InMemoryCache, UpdateCache};
+use crate::{CacheableModels, InMemoryCache, UpdateCache, config::ResourceType};
 use std::borrow::Cow;
 use twilight_model::{
     application::interaction::InteractionData, gateway::payload::incoming::InteractionCreate,
@@ -7,51 +7,50 @@ use twilight_model::{
 impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for InteractionCreate {
     fn update(&self, cache: &InMemoryCache<CacheModels>) {
         // Cache interaction member
-        if cache.wants(ResourceType::MEMBER) {
-            if let (Some(member), Some(guild_id)) = (&self.member, self.guild_id) {
-                if let Some(user) = &member.user {
-                    cache.cache_user(Cow::Borrowed(user), self.guild_id);
+        if cache.wants(ResourceType::MEMBER)
+            && let (Some(member), Some(guild_id)) = (&self.member, self.guild_id)
+            && let Some(user) = &member.user
+        {
+            cache.cache_user(Cow::Borrowed(user), self.guild_id);
 
-                    cache.cache_borrowed_partial_member(guild_id, member, user.id);
-                }
-            }
+            cache.cache_borrowed_partial_member(guild_id, member, user.id);
         }
 
         // Cache interaction user
-        if cache.wants(ResourceType::USER) {
-            if let Some(user) = &self.user {
-                cache.cache_user(Cow::Borrowed(user), None);
-            }
+        if cache.wants(ResourceType::USER)
+            && let Some(user) = &self.user
+        {
+            cache.cache_user(Cow::Borrowed(user), None);
         }
 
         // Cache resolved interaction data
-        if let Some(InteractionData::ApplicationCommand(data)) = &self.data {
-            if let Some(resolved) = &data.resolved {
-                // Cache resolved users and members
-                for u in resolved.users.values() {
-                    if cache.wants(ResourceType::USER) {
-                        cache.cache_user(Cow::Borrowed(u), self.guild_id);
-                    }
-
-                    if !cache.wants(ResourceType::MEMBER) || self.guild_id.is_none() {
-                        continue;
-                    }
-
-                    // This should always match, because resolved members
-                    // are guaranteed to have a matching resolved user
-                    if let Some(member) = &resolved.members.get(&u.id) {
-                        if let Some(guild_id) = self.guild_id {
-                            cache.cache_borrowed_interaction_member(guild_id, member, u.id);
-                        }
-                    }
+        if let Some(InteractionData::ApplicationCommand(data)) = &self.data
+            && let Some(resolved) = &data.resolved
+        {
+            // Cache resolved users and members
+            for u in resolved.users.values() {
+                if cache.wants(ResourceType::USER) {
+                    cache.cache_user(Cow::Borrowed(u), self.guild_id);
                 }
 
-                // Cache resolved roles
-                if cache.wants(ResourceType::ROLE) {
-                    if let Some(guild_id) = self.guild_id {
-                        cache.cache_roles(guild_id, resolved.roles.values().cloned());
-                    }
+                if !cache.wants(ResourceType::MEMBER) || self.guild_id.is_none() {
+                    continue;
                 }
+
+                // This should always match, because resolved members
+                // are guaranteed to have a matching resolved user
+                if let Some(member) = &resolved.members.get(&u.id)
+                    && let Some(guild_id) = self.guild_id
+                {
+                    cache.cache_borrowed_interaction_member(guild_id, member, u.id);
+                }
+            }
+
+            // Cache resolved roles
+            if cache.wants(ResourceType::ROLE)
+                && let Some(guild_id) = self.guild_id
+            {
+                cache.cache_roles(guild_id, resolved.roles.values().cloned());
             }
         }
     }
@@ -61,26 +60,28 @@ impl<CacheModels: CacheableModels> UpdateCache<CacheModels> for InteractionCreat
 mod tests {
     use crate::DefaultInMemoryCache;
     use std::collections::HashMap;
+    use twilight_model::guild::RoleColors;
     use twilight_model::{
         application::{
             command::CommandType,
             interaction::{
-                application_command::CommandData, Interaction, InteractionData,
-                InteractionDataResolved, InteractionMember, InteractionType,
+                Interaction, InteractionData, InteractionDataResolved, InteractionMember,
+                InteractionType, application_command::CommandData,
             },
         },
         channel::{
-            message::{
-                sticker::{MessageSticker, StickerFormatType},
-                MessageFlags, MessageType,
-            },
             Channel, ChannelType, Message,
+            message::{
+                MessageFlags, MessageType,
+                sticker::{MessageSticker, StickerFormatType},
+            },
         },
         gateway::payload::incoming::InteractionCreate,
         guild::{MemberFlags, PartialMember, Permissions, Role, RoleFlags},
         id::Id,
+        oauth::ApplicationIntegrationMap,
         user::User,
-        util::{image_hash::ImageHashParseError, ImageHash, Timestamp},
+        util::{ImageHash, Timestamp, image_hash::ImageHashParseError},
     };
 
     #[allow(clippy::too_many_lines, deprecated)]
@@ -97,6 +98,10 @@ mod tests {
         cache.update(&InteractionCreate(Interaction {
             app_permissions: Some(Permissions::SEND_MESSAGES),
             application_id: Id::new(1),
+            authorizing_integration_owners: ApplicationIntegrationMap {
+                guild: None,
+                user: None,
+            },
             channel: Some(Channel {
                 bitrate: None,
                 guild_id: None,
@@ -135,6 +140,7 @@ mod tests {
                 video_quality_mode: None,
             }),
             channel_id: Some(Id::new(2)),
+            context: None,
             data: Some(InteractionData::ApplicationCommand(Box::new(CommandData {
                 guild_id: None,
                 id: Id::new(5),
@@ -148,6 +154,8 @@ mod tests {
                         Id::new(7),
                         InteractionMember {
                             avatar: None,
+                            avatar_decoration_data: None,
+                            banner: None,
                             communication_disabled_until: None,
                             flags,
                             joined_at: Some(timestamp),
@@ -181,6 +189,7 @@ mod tests {
                                 mfa_enabled: None,
                                 name: "test".to_owned(),
                                 premium_type: None,
+                                primary_guild: None,
                                 public_flags: None,
                                 system: None,
                                 verified: None,
@@ -195,9 +204,12 @@ mod tests {
                             guild_id: Some(Id::new(1)),
                             id: Id::new(4),
                             interaction: None,
+                            interaction_metadata: None,
                             kind: MessageType::Regular,
                             member: Some(PartialMember {
                                 avatar: None,
+                                avatar_decoration_data: None,
+                                banner: None,
                                 communication_disabled_until: None,
                                 deaf: false,
                                 flags,
@@ -218,15 +230,15 @@ mod tests {
                             poll: None,
                             reactions: Vec::new(),
                             reference: None,
+                            referenced_message: None,
                             role_subscription_data: None,
                             sticker_items: vec![MessageSticker {
                                 format_type: StickerFormatType::Png,
                                 id: Id::new(1),
                                 name: "sticker name".to_owned(),
                             }],
-                            referenced_message: None,
-                            thread: None,
                             timestamp,
+                            thread: None,
                             tts: false,
                             webhook_id: None,
                         },
@@ -235,6 +247,11 @@ mod tests {
                         Id::new(8),
                         Role {
                             color: 0u32,
+                            colors: RoleColors {
+                                primary_color: 0,
+                                secondary_color: None,
+                                tertiary_color: None,
+                            },
                             hoist: false,
                             icon: None,
                             id: Id::new(8),
@@ -266,6 +283,7 @@ mod tests {
                             mfa_enabled: None,
                             name: "different name".into(),
                             premium_type: None,
+                            primary_guild: None,
                             public_flags: None,
                             system: None,
                             verified: None,
@@ -275,6 +293,7 @@ mod tests {
                 target_id: None,
             }))),
             entitlements: Vec::new(),
+            guild: None,
             guild_id: Some(Id::new(3)),
             guild_locale: None,
             id: Id::new(4),
@@ -282,6 +301,8 @@ mod tests {
             locale: Some("en-GB".to_owned()),
             member: Some(PartialMember {
                 avatar: None,
+                avatar_decoration_data: None,
+                banner: None,
                 communication_disabled_until: None,
                 deaf: false,
                 flags,
@@ -307,6 +328,7 @@ mod tests {
                     mfa_enabled: None,
                     name: "username".into(),
                     premium_type: None,
+                    primary_guild: None,
                     public_flags: None,
                     system: None,
                     verified: None,

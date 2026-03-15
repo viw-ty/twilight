@@ -27,22 +27,22 @@ use std::fmt::Debug;
 use twilight_model::{
     application::interaction::InteractionMember,
     channel::{
-        message::{Reaction, Sticker},
         Channel, ChannelType, Message, StageInstance,
+        message::{Reaction, Sticker},
     },
     gateway::{
-        payload::incoming::{GuildUpdate, MemberUpdate, MessageUpdate},
+        payload::incoming::{GuildUpdate, MemberUpdate},
         presence::Presence,
     },
     guild::{
-        scheduled_event::GuildScheduledEvent, Emoji, Guild, GuildIntegration, Member,
-        PartialMember, Role,
+        Emoji, Guild, GuildIntegration, Member, PartialMember, Role,
+        scheduled_event::GuildScheduledEvent,
     },
     id::{
+        Id,
         marker::{
             ChannelMarker, GuildMarker, RoleMarker, ScheduledEventMarker, StickerMarker, UserMarker,
         },
-        Id,
     },
     user::{CurrentUser, User},
     util::{ImageHash, Timestamp},
@@ -206,7 +206,7 @@ pub trait CacheableGuild: From<Guild> + PartialEq<Guild> + PartialEq<Self> + Clo
     fn owner_id(&self) -> Id<UserMarker>;
 
     /// Set the guild's unavailable flag.
-    fn set_unavailable(&mut self, unavailable: bool);
+    fn set_unavailable(&mut self, unavailable: Option<bool>);
 
     /// Update the cached data with a [`GuildUpdate`] event. Fields containing other
     /// cached structures such as channels are cleared prior.
@@ -235,9 +235,6 @@ pub trait CacheableVoiceState:
 pub trait CacheableMessage:
     From<Message> + PartialEq<Message> + PartialEq<Self> + Clone + Debug
 {
-    /// Update the cached data with a [`MessageUpdate`] event.
-    fn update_with_message_update(&mut self, message_update: &MessageUpdate);
-
     /// Reactions added to this message.
     fn reactions(&self) -> &[Reaction];
 

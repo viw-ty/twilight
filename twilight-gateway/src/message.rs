@@ -43,7 +43,7 @@ impl Message {
         if msg.is_close() {
             let (code, reason) = msg.as_close().unwrap();
 
-            let frame = (code == CloseCode::NO_STATUS_RECEIVED).then(|| CloseFrame {
+            let frame = (code != CloseCode::NO_STATUS_RECEIVED).then(|| CloseFrame {
                 code: code.into(),
                 reason: Cow::Owned(reason.to_string()),
             });
@@ -58,7 +58,7 @@ impl Message {
 
     /// Convert a `twilight` websocket message into a `tokio-websockets` websocket
     /// message.
-    pub(crate) fn into_websocket_msg(self) -> WebsocketMessage {
+    pub(crate) fn into_websocket(self) -> WebsocketMessage {
         match self {
             Self::Close(frame) => WebsocketMessage::close(
                 frame

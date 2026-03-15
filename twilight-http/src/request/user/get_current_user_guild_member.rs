@@ -1,14 +1,15 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
+    Error,
     client::Client,
     request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
     routing::Route,
-    Error,
 };
 use std::future::IntoFuture;
 use twilight_model::{
     guild::Member,
-    id::{marker::GuildMarker, Id},
+    id::{Id, marker::GuildMarker},
 };
 
 /// Get information about the current user in a guild.
@@ -24,6 +25,7 @@ impl<'a> GetCurrentUserGuildMember<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for GetCurrentUserGuildMember<'_> {
     type Output = Result<Response<Member>, Error>;
 

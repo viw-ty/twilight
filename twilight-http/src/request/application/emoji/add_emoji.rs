@@ -1,16 +1,17 @@
 use std::future::IntoFuture;
 
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
-    request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
-    routing::Route,
     Client, Error,
+    request::{Request, TryIntoRequest},
+    routing::Route,
 };
 
 use serde::Serialize;
 use twilight_model::{
     guild::Emoji,
-    id::{marker::ApplicationMarker, Id},
+    id::{Id, marker::ApplicationMarker},
 };
 
 #[derive(Serialize)]
@@ -40,6 +41,7 @@ impl<'a> AddApplicationEmoji<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for AddApplicationEmoji<'_> {
     type Output = Result<Response<Emoji>, Error>;
 

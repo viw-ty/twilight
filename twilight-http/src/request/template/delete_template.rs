@@ -1,12 +1,13 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture, marker::EmptyBody};
 use crate::{
     client::Client,
     error::Error,
     request::{Request, TryIntoRequest},
-    response::{marker::EmptyBody, Response, ResponseFuture},
     routing::Route,
 };
 use std::future::IntoFuture;
-use twilight_model::id::{marker::GuildMarker, Id};
+use twilight_model::id::{Id, marker::GuildMarker};
 
 /// Delete a template by ID and code.
 #[must_use = "requests must be configured and executed"]
@@ -30,6 +31,7 @@ impl<'a> DeleteTemplate<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteTemplate<'_> {
     type Output = Result<Response<EmptyBody>, Error>;
 

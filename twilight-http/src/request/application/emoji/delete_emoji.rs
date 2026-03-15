@@ -1,14 +1,15 @@
 use std::future::IntoFuture;
 use twilight_model::id::{
-    marker::{ApplicationMarker, EmojiMarker},
     Id,
+    marker::{ApplicationMarker, EmojiMarker},
 };
 
+#[cfg(not(target_os = "wasi"))]
+use crate::response::{Response, ResponseFuture};
 use crate::{
-    request::{Request, TryIntoRequest},
-    response::{Response, ResponseFuture},
-    routing::Route,
     Client, Error,
+    request::{Request, TryIntoRequest},
+    routing::Route,
 };
 
 pub struct DeleteApplicationEmoji<'a> {
@@ -31,6 +32,7 @@ impl<'a> DeleteApplicationEmoji<'a> {
     }
 }
 
+#[cfg(not(target_os = "wasi"))]
 impl IntoFuture for DeleteApplicationEmoji<'_> {
     type Output = Result<Response<()>, Error>;
 

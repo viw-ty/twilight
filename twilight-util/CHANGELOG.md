@@ -1,10 +1,43 @@
 # Changelog
 
-## [unreleased]
+## [0.17.0] - 2025-11-08
+
+### Bug Fixes
+
+- resolve clippy 1.86 lints ([#2426](https://github.com/twilight-rs/twilight/issues/2426))
+- doc_auto_cfg got merged into doc_cfg ([#2458](https://github.com/twilight-rs/twilight/issues/2458))
+
+### Features
+
+- `poll` Field for Interaction Callback and Followups ([#2439](https://github.com/twilight-rs/twilight/issues/2439))
+- Components V2 ([#2422](https://github.com/twilight-rs/twilight/issues/2422))
+- [**breaking**] New modal components ([#2461](https://github.com/twilight-rs/twilight/issues/2461))
+
+### Refactor
+
+- migrate from `NonZero` type aliases ([#2462](https://github.com/twilight-rs/twilight/issues/2462))
+
+### Chore
+
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [0.16.0] - 2025-01-12
+
+### Features
+
+- Implement Premium Button Style ([#2363](https://github.com/twilight-rs/twilight/issues/2363))
+- Implement user applications ([#2323](https://github.com/twilight-rs/twilight/issues/2323))
+- add contexts and integration types to command builder ([#2386](https://github.com/twilight-rs/twilight/issues/2386))
 
 ### Refactor
 
 - Remove redundant imports ([#2316](https://github.com/twilight-rs/twilight/issues/2316))
+
+### Chore
+
+- Bump MSRV to 1.79 and resolve Clippy 1.80 lints ([#2366](https://github.com/twilight-rs/twilight/issues/2366))
+- resolve rust 1.83 issues ([#2391](https://github.com/twilight-rs/twilight/issues/2391))
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
 
 ## [0.15.2] - 2023-04-27
 

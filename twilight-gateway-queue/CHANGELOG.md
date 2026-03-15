@@ -1,6 +1,12 @@
 # Changelog
 
-## [unreleased]
+## [0.17.0] - 2025-11-08
+
+### Chore
+
+- Update all dependencies ([#2450](https://github.com/twilight-rs/twilight/issues/2450))
+
+## [0.16.0] - 2025-01-12
 
 ### Bug Fixes
 
@@ -14,6 +20,10 @@
 ### Refactor
 
 - [**breaking**] Rewrite crate ([#2228](https://github.com/twilight-rs/twilight/issues/2228))
+
+### Chore
+
+- Clarify that MSRV may change in semver-compatible releases ([#2408](https://github.com/twilight-rs/twilight/issues/2408))
 
 ## [0.15.3] - 2023-09-10
 

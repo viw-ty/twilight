@@ -31,7 +31,7 @@ use std::collections::HashMap;
 use twilight_model::{
     application::command::{CommandOption, CommandType},
     guild::Permissions,
-    id::{marker::ApplicationMarker, Id},
+    id::{Id, marker::ApplicationMarker},
 };
 
 /// Version of [`Command`] but with borrowed fields.
@@ -76,9 +76,11 @@ mod tests {
     /// `Command` or a type is changed then the destructure of it and creation
     /// of `CommandBorrowed` will fail.
     #[test]
+    #[allow(deprecated)]
     fn command_borrowed_from_command() {
         let command = Command {
             application_id: Some(Id::new(1)),
+            contexts: None,
             default_member_permissions: Some(Permissions::ADMINISTRATOR),
             dm_permission: Some(true),
             description: "command description".to_owned(),
@@ -88,6 +90,7 @@ mod tests {
             )])),
             guild_id: Some(Id::new(2)),
             id: Some(Id::new(3)),
+            integration_types: None,
             kind: CommandType::ChatInput,
             name: "command name".to_owned(),
             name_localizations: Some(HashMap::from([(
